@@ -1,16 +1,14 @@
+import {
+    assumedSourceDataUpdateRateMs,
+    dataRequestIntervalMs,
+    EMPTY_VATSIM_DATA,
+    SERVER_PORT
+} from './serverConstants';
+
 const express = require('express');
-const getPilotData = require('./getPilotData');
+const getPilotData = require('../getPilotData');
 
 const app = express();
-const port = process.env.PORT || 3003;
-const assumedSourceDataUpdateRateMs = 60000;
-const dataRequestIntervalMs = 15000; // should be 60 seconds!
-const EMPTY_VATSIM_DATA = {
-    updateTime: 0,
-    totalConnections: 0,
-    pilotConnections: 0,
-    data: []
-};
 let latestPilotData = EMPTY_VATSIM_DATA;
 
 app.get('/getUpdatedData', function(req, res) {
@@ -34,8 +32,8 @@ app.get('/getUpdatedData', function(req, res) {
 // serve index.html, css, images, scripts all in one instead of using app.get()
 app.use(express.static('public'));
 
-app.listen(port, function() {
-    console.log(`Listening on port ${port}`);
+app.listen(SERVER_PORT, function() {
+    console.log(`Listening on port ${SERVER_PORT}`);
 });
 
 
