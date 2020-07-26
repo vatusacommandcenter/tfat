@@ -1,4 +1,5 @@
 const $aircraftListElement = document.getElementById('aircraft-list');
+const $updateTimeElement = document.getElementById('updateTime');
 // const $trafficDataTimestamp = document.getElementById('aircraft-list-timestamp');
 // const clockUpdateInterval = 15000;
 // const dataUpdateInterval = 500;
@@ -16,7 +17,9 @@ const dataUpdateInterval = 15000;
 // }
 
 function renderVatsimData(data) {
-    $aircraftListElement.innerHTML = data;
+    const date = String(data.updateTime);
+    $aircraftListElement.innerHTML = JSON.stringify(data);
+    $updateTimeElement.innerText = `Last updated: ${date.substr(8, 2)}:${date.substr(10, 2)}z`
 }
 
 function processVatsimData(httpResponse) {
