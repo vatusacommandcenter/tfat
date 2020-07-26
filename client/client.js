@@ -4,6 +4,7 @@ const $aircraftListElement = document.getElementById('aircraft-list');
 // const dataUpdateInterval = 500;
 // const dataCatchupInterval =
 let lastUpdateTime = 0;
+const dataUpdateInterval = 15000;
 
 // function updateClock() {
 //     const date = new Date();
@@ -53,4 +54,4 @@ function getUpdatedData() {
 
 // setInterval(updateClock, clockUpdateInterval);
 getUpdatedData();
-// setInterval(getUpdatedData, clockUpdateInterval);
+setInterval(getUpdatedData, dataUpdateInterval);

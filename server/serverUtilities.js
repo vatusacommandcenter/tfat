@@ -1,9 +1,8 @@
 import {
     assumedSourceDataUpdateRateMs,
     dataRequestIntervalMs
-} from './serverConstants';
-
-const getPilotData = require('./getPilotData');
+} from './serverConstants.js';
+import getPilotData from './getPilotData.js';
 
 /**
  * Ask VATSIM server for fresh traffic data and store in `latestPilotData`

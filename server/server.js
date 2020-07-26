@@ -1,12 +1,11 @@
+import express from 'express';
 import {
     EMPTY_VATSIM_DATA,
     SERVER_PORT
-} from './serverConstants';
+} from './serverConstants.js';
 import {
     initializeVatsimDataRequestSchedule
-} from './serverUtilities';
-
-const express = require('express');
+} from './serverUtilities.js';
 
 const app = express();
 // TODO: This will be mutated by initializeVatsimDataRequestSchedule()

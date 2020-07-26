@@ -1,6 +1,5 @@
-import { DECIMAL_RADIX } from '../globalConstants';
-
-const nodeFetch = require('node-fetch');
+import nodeFetch from 'node-fetch';
+import { DECIMAL_RADIX } from '../globalConstants.js';
 
 // let vatsimRawConnectionData = '';
 // let vatsimParsedPilotConnectionData = [];
@@ -120,11 +119,9 @@ function parsePilotConnections(rawData) {
  * @function getParsedVatsimPilotConnectionData
  * @returns Promise
  */
-function getParsedVatsimPilotConnectionData() {
+export default function getParsedVatsimPilotConnectionData() {
     return fetchVatsimConnections()
         .then((rawData) => parsePilotConnections(rawData));
     // .then(() => vatsimParsedPilotConnectionData);
     // .then(() => console.log(vatsimParsedPilotConnectionData));
 }
-
-module.exports = getParsedVatsimPilotConnectionData;
