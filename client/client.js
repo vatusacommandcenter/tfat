@@ -19,7 +19,7 @@ const dataUpdateInterval = 15000;
 function renderVatsimData(data) {
     const date = String(data.updateTime);
     $aircraftListElement.innerHTML = JSON.stringify(data);
-    $updateTimeElement.innerText = `Last updated: ${date.substr(8, 2)}:${date.substr(10, 2)}z`
+    $updateTimeElement.innerText = `Last updated: ${date.substr(8, 2)}:${date.substr(10, 2)}z`;
 }
 
 function processVatsimData(httpResponse) {
