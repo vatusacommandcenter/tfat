@@ -76,7 +76,7 @@ export function generateDateFromVatsimTimestamp(timestamp) {
  * @returns undefined
  */
 export function initializeDataRequestSchedule(latestPilotData) {
-    setInterval(getFreshData, dataRequestIntervalMs);
+    setInterval(getFreshData, dataRequestIntervalMs, latestPilotData);
     console.log(`first on-sync fetch at: ${new Date().toUTCString()}`);
     getFreshData(latestPilotData); // keep after setting interval to hit target update time accurately
 }
