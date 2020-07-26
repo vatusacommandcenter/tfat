@@ -14,11 +14,11 @@ const app = express();
 let latestPilotData = EMPTY_VATSIM_DATA; // eslint-disable-line prefer-const
 
 app.get('/getUpdatedData', (req, res) => {
-    res.send(latestPilotData === EMPTY_VATSIM_DATA);
+    res.send(latestPilotData);
 });
 
 // serve index.html, css, images, scripts all in one instead of using app.get()
-app.use(express.static('public'));
+app.use(express.static('dist/client'));
 app.listen(SERVER_PORT, () => {
     console.log(`Listening on port ${SERVER_PORT}`);
 });
