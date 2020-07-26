@@ -1,6 +1,4 @@
 import {
-    assumedSourceDataUpdateRateMs,
-    dataRequestIntervalMs,
     EMPTY_VATSIM_DATA,
     SERVER_PORT
 } from './serverConstants';
@@ -9,18 +7,20 @@ import {
 } from './serverUtilities';
 
 const express = require('express');
-const app = express();
-let latestPilotData = EMPTY_VATSIM_DATA;
 
-app.get('/getUpdatedData', function(req, res) {
-    res.send(latestPilotData);
+const app = express();
+// TODO: This will be mutated by initializeVatsimDataRequestSchedule()
+// There are better and clearer ways to do this!
+let latestPilotData = EMPTY_VATSIM_DATA; // eslint-disable-line prefer-const
+
+app.get('/getUpdatedData', (req, res) => {
+    res.send(latestPilotData === EMPTY_VATSIM_DATA);
 });
 
 // serve index.html, css, images, scripts all in one instead of using app.get()
 app.use(express.static('public'));
-
-app.listen(SERVER_PORT, function() {
+app.listen(SERVER_PORT, () => {
     console.log(`Listening on port ${SERVER_PORT}`);
 });
 
-initializeVatsimDataRequestSchedule();
+initializeVatsimDataRequestSchedule(latestPilotData);

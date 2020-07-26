@@ -1,3 +1,5 @@
+import { DECIMAL_RADIX } from '../globalConstants';
+
 const nodeFetch = require('node-fetch');
 
 // let vatsimRawConnectionData = '';
@@ -15,8 +17,8 @@ const vatsimDataUrl = 'http://cluster.data.vatsim.net/vatsim-data.txt';
 function fetchVatsimConnections() {
     return nodeFetch(vatsimDataUrl)
         .then((response) => response.text());
-        // .then(data => vatsimRawConnectionData = data);
-        // .then(() => console.log(vatsimRawConnectionData));
+    // .then(data => vatsimRawConnectionData = data);
+    // .then(() => console.log(vatsimRawConnectionData));
 }
 
 /**
@@ -28,24 +30,24 @@ function fetchVatsimConnections() {
  */
 function parsePilotConnections(rawData) {
     const lines = rawData.split('\n');
-    let vatsimParsedPilotConnectionData = [];
+    const vatsimParsedPilotConnectionData = [];
     let updateTime = 0;
     let totalConnections = 0;
     let pilotConnections = 0;
 
     for (const line of lines) {
         if (line.includes('UPDATE = ')) {
-            updateTime = parseInt(line.substr(9));
+            updateTime = parseInt(line.substr(9), DECIMAL_RADIX);
 
             continue;
         }
 
         if (line.includes('CONNECTED CLIENTS = ')) {
-            totalConnections = parseInt(line.substr(20));
+            totalConnections = parseInt(line.substr(20), DECIMAL_RADIX);
 
             continue;
         }
-        
+
         if (!line.includes(':PILOT:')) {
             continue;
         }
@@ -53,6 +55,7 @@ function parsePilotConnections(rawData) {
         // assemble pilot data
         const fields = line.split(':');
         const pilotInfo = {
+            /* eslint-disable no-multi-spaces */
             callsign: fields[0],    // callsign
             cid: fields[1],         // VATSIM CID
             name: fields[2],        // name used when connecting
@@ -98,7 +101,7 @@ function parsePilotConnections(rawData) {
 
         vatsimParsedPilotConnectionData.push(pilotInfo);
     }
-    
+
     pilotConnections = vatsimParsedPilotConnectionData.length;
     const response = {
         updateTime,
@@ -119,9 +122,9 @@ function parsePilotConnections(rawData) {
  */
 function getParsedVatsimPilotConnectionData() {
     return fetchVatsimConnections()
-        .then(rawData => parsePilotConnections(rawData));
-        // .then(() => vatsimParsedPilotConnectionData);
-        // .then(() => console.log(vatsimParsedPilotConnectionData));
+        .then((rawData) => parsePilotConnections(rawData));
+    // .then(() => vatsimParsedPilotConnectionData);
+    // .then(() => console.log(vatsimParsedPilotConnectionData));
 }
 
 module.exports = getParsedVatsimPilotConnectionData;

@@ -1,3 +1,8 @@
+import {
+    assumedSourceDataUpdateRateMs,
+    dataRequestIntervalMs
+} from './serverConstants';
+
 const getPilotData = require('./getPilotData');
 
 /**
@@ -7,7 +12,7 @@ const getPilotData = require('./getPilotData');
  * @returns {Promise} - promise from getPilotData()
  */
 export function getFreshData(latestPilotData) {
-    return getPilotData().then(function (data) {
+    return getPilotData().then((data) => {
         if (!data || !data.updateTime) {
             console.warn(`Received invalid pilot data from VATSIM: \n${data}`);
 
@@ -21,8 +26,7 @@ export function getFreshData(latestPilotData) {
         } else if (data.updateTime < latestPilotData.updateTime) {
             console.warn('Data hiccup from VATSIM! Fresh data is timestamped OLDER than data we already had! ' +
                 `Stored data timestamp: ${latestPilotData.updateTime}` +
-                `Received data timestamp: ${data.updateTime}`
-            );
+                `Received data timestamp: ${data.updateTime}`);
 
             return;
         }
@@ -32,50 +36,9 @@ export function getFreshData(latestPilotData) {
         console.log(data.updateTime);
 
         return data;
-    }).catch(function (error) {
-        res.status(500, { error });
+    }).catch((error) => {
+        console.error(error);
     });
-}
-
-
-/**
- * Schedule the next request of the VATSIM data file for the time when we expect it to next be changed
- * Note: This function will also get fresh traffic data from VATSIM at this time
- *
- * @function initializeVatsimDataRequestSchedule
- * @returns undefined
- */
-export function initializeVatsimDataRequestSchedule() {
-    console.log(`first data fetch time: ${new Date().toUTCString()}`);
-    getFreshData(latestPilotData).then(function (data) {
-        const sourceDataUpdateTime = generateDateFromVatsimTimestamp(data.updateTime);
-        const nextSourceDataUpdateTime = sourceDataUpdateTime + assumedSourceDataUpdateRateMs;
-        const remainingTimeUntilSourceUpdate = nextSourceDataUpdateTime - Date.now();
-        const minimumTimeToJoinThisCycleMs = 10000;
-        const additionalWaitTimeMs = 10000; // don't request data with everyone else
-        let timeOfNextDataPull = nextSourceDataUpdateTime + additionalWaitTimeMs;
-
-        if (remainingTimeUntilSourceUpdate < minimumTimeToJoinThisCycleMs) {
-            timeOfNextDataPull += assumedSourceDataUpdateRateMs;
-        }
-
-        console.log(`planning to fetch at: ${new Date(timeOfNextDataPull).toUTCString()}`);
-
-        const msUntilNextDataPull = timeOfNextDataPull - Date.now();
-        setTimeout(initializeDataRequestSchedule, msUntilNextDataPull);
-    });
-}
-
-/**
- * Initialize a recurring schedule to request traffic data from VATSIM repeatedly
- *
- * @function initializeDataRequestSchedule
- * @returns undefined
- */
-export function initializeDataRequestSchedule() {
-    setInterval(getFreshData, dataRequestIntervalMs);
-    console.log(`first on-sync fetch at: ${new Date().toUTCString()}`);
-    getFreshData(latestPilotData); // keep after setting interval to hit target update time accurately
 }
 
 /**
@@ -104,4 +67,46 @@ export function generateDateFromVatsimTimestamp(timestamp) {
     const date = Date.UTC(year, month, day, hour, min, sec);
 
     return date;
+}
+
+/**
+ * Initialize a recurring schedule to request traffic data from VATSIM repeatedly
+ *
+ * @function initializeDataRequestSchedule
+ * @returns undefined
+ */
+export function initializeDataRequestSchedule(latestPilotData) {
+    setInterval(getFreshData, dataRequestIntervalMs);
+    console.log(`first on-sync fetch at: ${new Date().toUTCString()}`);
+    getFreshData(latestPilotData); // keep after setting interval to hit target update time accurately
+}
+
+/**
+ * Schedule the next request of the VATSIM data file for the time when we expect it to next be changed
+ * Note: This function will also get fresh traffic data from VATSIM at this time
+ *
+ * @function initializeVatsimDataRequestSchedule
+ * @returns undefined
+ */
+export function initializeVatsimDataRequestSchedule(latestPilotData) {
+    console.log(`first data fetch time: ${new Date().toUTCString()}`);
+    return getFreshData(latestPilotData).then((data) => {
+        const sourceDataUpdateTime = generateDateFromVatsimTimestamp(data.updateTime);
+        const nextSourceDataUpdateTime = sourceDataUpdateTime + assumedSourceDataUpdateRateMs;
+        const remainingTimeUntilSourceUpdate = nextSourceDataUpdateTime - Date.now();
+        const minimumTimeToJoinThisCycleMs = 10000;
+        const additionalWaitTimeMs = 10000; // don't request data with everyone else
+        let timeOfNextDataPull = nextSourceDataUpdateTime + additionalWaitTimeMs;
+
+        if (remainingTimeUntilSourceUpdate < minimumTimeToJoinThisCycleMs) {
+            timeOfNextDataPull += assumedSourceDataUpdateRateMs;
+        }
+
+        console.log(`planning to fetch at: ${new Date(timeOfNextDataPull).toUTCString()}`);
+
+        const msUntilNextDataPull = timeOfNextDataPull - Date.now();
+        setTimeout(initializeDataRequestSchedule, msUntilNextDataPull, latestPilotData);
+
+        return data;
+    });
 }
