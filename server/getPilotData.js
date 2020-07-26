@@ -14,7 +14,7 @@ const vatsimDataUrl = 'http://cluster.data.vatsim.net/vatsim-data.txt';
  */
 function fetchVatsimConnections() {
     return nodeFetch(vatsimDataUrl)
-        .then(response => response.text());
+        .then((response) => response.text());
         // .then(data => vatsimRawConnectionData = data);
         // .then(() => console.log(vatsimRawConnectionData));
 }
@@ -33,7 +33,7 @@ function parsePilotConnections(rawData) {
     let totalConnections = 0;
     let pilotConnections = 0;
 
-    for (line of lines) {
+    for (const line of lines) {
         if (line.includes('UPDATE = ')) {
             updateTime = parseInt(line.substr(9));
 
