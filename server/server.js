@@ -1,13 +1,6 @@
 import express from 'express';
-import {
-    startVatsimDataUpdates
-} from './serverUtilities.js';
-import {
-    EMPTY_VATSIM_DATA,
-    SERVER_PORT,
-    assumedSourceDataUpdateRateMs,
-    dataRequestIntervalMs
-} from './serverConstants.js';
+import { SERVER_PORT } from './serverConstants.js';
+import { EMPTY_VATSIM_DATA } from '../globalConstants.js';
 import getPilotData from './getPilotData.js';
 
 const app = express();
@@ -59,4 +52,5 @@ export function updateLocalData() {
     });
 }
 
-startVatsimDataUpdates(updateLocalData, dataRequestIntervalMs, assumedSourceDataUpdateRateMs);
+// startVatsimDataUpdates(updateLocalData, dataRequestIntervalMs, assumedSourceDataUpdateRateMs);
+updateLocalData();

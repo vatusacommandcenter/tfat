@@ -9,10 +9,15 @@
   },
   "type": "module",
   "scripts": {
-    "build": "copyfiles -f client/index.html public && babel client -d public",
+    "build": "copyfiles -f client/index.html public && npm run webpack",
+    "build-dev": "copyfiles -f client/index.html public && npm run webpack-dev",
+    "OLDbuild": "copyfiles -f client/index.html public && babel client -d public",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node ./server/server.js",
-    "nodemon": "nodemon ./server/server.js"
+    "nodemon": "nodemon ./server/server.js",
+    "webpack": "webpack --mode=production client/client.js -o public/bundle.js",
+    "webpack-dev": "webpack --mode=development client/client.js -o public/bundle.js --devtool=source-map",
+        "_note": "If webpack-dev becomes painfully slow, using `eval-source-map` will run faster, but will also show some duplicitave 'internal' source maps which may be annoying"
   },
   "author": "Erik Quinn",
   "license": "MIT",
@@ -28,6 +33,8 @@
     "eslint": "^7.5.0",
     "eslint-config-airbnb-base": "^14.2.0",
     "eslint-plugin-import": "^2.22.0",
-    "nodemon": "^2.0.4"
+    "nodemon": "^2.0.4",
+    "webpack": "^4.44.0",
+    "webpack-cli": "^3.3.12"
   }
 }
