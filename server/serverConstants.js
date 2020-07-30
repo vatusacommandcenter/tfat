@@ -25,5 +25,6 @@ export const assumedSourceDataUpdateRateMs = 60000;
  *
  * @enum dataRequestIntervalMs
  * @type {number}
+ * @default 60000
  */
-export const dataRequestIntervalMs = 60000; // should be the same as the source's update rate
+export const dataRequestIntervalMs = 99999999999999999999; // should be the same as the source's update rate

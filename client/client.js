@@ -1,25 +1,29 @@
 // import { vatsimDataMock } from './mockdata.js';
-import { DESTINATION_GROUP } from './clientConstants.js';
+import {
+    DESTINATION_GROUP,
+    DATA_UPDATE_INTERVAL,
+    CLOCK_UPDATE_INTERVAL
+} from './clientConstants.js';
 import { EMPTY_VATSIM_DATA } from '../globalConstants.js';
 
 const $aircraftListElement = document.getElementById('aircraft-list');
 const $updateTimeElement = document.getElementById('updateTime');
+const $clockElement = document.getElementById('clock');
 // const $trafficDataTimestamp = document.getElementById('aircraft-list-timestamp');
 // const clockUpdateInterval = 15000;
-// const dataUpdateInterval = 500;
+// const DATA_UPDATE_INTERVAL = 500;
 // const dataCatchupInterval =
 let lastUpdateTime = 0;
 let latestData = EMPTY_VATSIM_DATA;
-const dataUpdateInterval = 500000000;
 
-// function updateClock() {
-//     const date = new Date();
-//     const hr = date.getUTCHours().toString().padStart(2, '0');
-//     const min = date.getUTCMinutes().toString().padStart(2, '0');
-//     const sec = date.getUTCSeconds().toString().padStart(2, '0');
-//     const currentTime = `Current Time: ${hr}:${min}:${sec}z`;
-//     $aircraftListElement.textContent = currentTime;
-// }
+function updateClock() {
+    const date = new Date();
+    const hr = date.getUTCHours().toString().padStart(2, '0');
+    const min = date.getUTCMinutes().toString().padStart(2, '0');
+    const sec = date.getUTCSeconds().toString().padStart(2, '0');
+    const currentTime = `${hr}:${min}:${sec}z`;
+    $clockElement.innerText = currentTime;
+}
 
 function filterPilotsByDestinationGroup(destinationGroupName) {
     if (!(destinationGroupName in DESTINATION_GROUP)) {
@@ -105,4 +109,5 @@ function getUpdatedData() {
 
 // setInterval(updateClock, clockUpdateInterval);
 getUpdatedData();
-setInterval(getUpdatedData, dataUpdateInterval);
+setInterval(getUpdatedData, DATA_UPDATE_INTERVAL);
+setInterval(updateClock, CLOCK_UPDATE_INTERVAL);

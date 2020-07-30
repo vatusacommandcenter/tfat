@@ -12,3 +12,23 @@ export const DESTINATION_GROUP = {
     MYNN: ['MYAF', 'MYEH', 'MYER', 'MYNN'],
     MBPV: ['MBAC', 'MBGT', 'MBNC', 'MBPI', 'MBPV', 'MBSC', 'MBSY']
 };
+/* eslint-enable max-len */
+
+/**
+ * Interval (milliseconds) upon which the client will repeatedly request new pilot
+ * data from the server
+ *
+ * @enum DATA_UPDATE_INTERVAL
+ * @type {number} - milliseconds between subsequent requests for new data
+ * @default 10000 (10 seconds)
+ */
+export const DATA_UPDATE_INTERVAL = 500000000;
+
+/**
+ * Interval (milliseconds) upon which the client will update the clock time
+ *
+ * @enum CLOCK_UDPATE_INTERVAL
+ * @type {number} - milliseconds between updating the time displayed on the clock
+ * @default 1000
+ */
+export const CLOCK_UPDATE_INTERVAL = 1000;

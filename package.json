@@ -9,8 +9,9 @@
   },
   "type": "module",
   "scripts": {
-    "build": "copyfiles -f client/index.html public && npm run webpack",
-    "build-dev": "copyfiles -f client/index.html public && npm run webpack-dev",
+    "build": "npm run copyHtml && npm run webpack",
+    "build-dev": "npm run copyHtml && npm run webpack-dev",
+    "copyHtml": "copyfiles -f client/index.html public && copyfiles -f client/style/* public/style",
     "OLDbuild": "copyfiles -f client/index.html public && babel client -d public",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node ./server/server.js",
