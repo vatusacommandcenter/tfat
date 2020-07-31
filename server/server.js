@@ -1,7 +1,12 @@
 import express from 'express';
-import { SERVER_PORT } from './serverConstants.js';
-import { EMPTY_VATSIM_DATA } from '../globalConstants.js';
 import getPilotData from './getPilotData.js';
+import {
+    assumedSourceDataUpdateRateMs,
+    dataRequestIntervalMs,
+    SERVER_PORT
+} from './serverConstants.js';
+import { EMPTY_VATSIM_DATA } from '../globalConstants.js';
+import { startVatsimDataUpdates } from './serverUtilities.js';
 
 const app = express();
 let latestPilotData = EMPTY_VATSIM_DATA;
@@ -22,7 +27,7 @@ app.listen(SERVER_PORT, () => {
  * @function updateLocalData
  * @returns {Promise} - promise from getPilotData()
  */
-export function updateLocalData() {
+function updateLocalData() {
     return getPilotData().then((data) => {
         const existingMetaData = latestPilotData.metaData;
         const nextMetaData = data.metaData;
@@ -33,9 +38,9 @@ export function updateLocalData() {
         }
 
         if (nextMetaData.updateTime === existingMetaData.updateTime) {
-            console.log(`${data.updateTime} (no change-- discarded)`);
+            console.log(`${nextMetaData.updateTime} (no change-- discarded)`);
 
-            return;
+            return data;
         } else if (nextMetaData.updateTime < existingMetaData.updateTime) {
             console.warn('Data hiccup from VATSIM! Fresh data is timestamped OLDER than data we already had! ' +
                 `Stored data timestamp: ${existingMetaData.updateTime}` +
@@ -54,5 +59,5 @@ export function updateLocalData() {
     });
 }
 
-// startVatsimDataUpdates(updateLocalData, dataRequestIntervalMs, assumedSourceDataUpdateRateMs);
-updateLocalData();
+startVatsimDataUpdates(updateLocalData, dataRequestIntervalMs, assumedSourceDataUpdateRateMs);
+// updateLocalData();

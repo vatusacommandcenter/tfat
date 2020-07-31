@@ -22,7 +22,7 @@ export const DESTINATION_GROUP = {
  * @type {number} - milliseconds between subsequent requests for new data
  * @default 10000 (10 seconds)
  */
-export const DATA_UPDATE_INTERVAL = 500000000;
+export const DATA_UPDATE_INTERVAL = 10000;
 
 /**
  * Interval (milliseconds) upon which the client will update the clock time

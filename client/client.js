@@ -36,7 +36,7 @@ function getAircraftToShow() {
 function renderVatsimData() {
     const filteredAircraftCollection = getAircraftToShow();
     aircraftTableView.showAircraft(filteredAircraftCollection);
-    timeStampView.setTimeStampFromVatsimDate(filteredAircraftCollection.updateTime);
+    timeStampView.updateTimeStampFromVatsimDate(filteredAircraftCollection.updateTime);
     // aircraftTableView.showAllAircraft();
 
     console.log(`----------------------------------New data rendered at ${new Date()}`);
@@ -78,3 +78,4 @@ function getUpdatedData() {
 getUpdatedData();
 setInterval(getUpdatedData, DATA_UPDATE_INTERVAL);
 clockView.enable();
+timeStampView.enable();

@@ -49,11 +49,11 @@ export function initializeDataRequestSchedule(updateLocalDataFunc, dataRequestIn
 export function startVatsimDataUpdates(updateLocalDataFunc, dataRequestIntervalMs, assumedSourceDataUpdateRateMs) {
     console.log(`first data fetch time: ${new Date().toUTCString()}`);
     return updateLocalDataFunc().then((data) => {
-        const sourceDataUpdateTime = generateDateFromVatsimTimestamp(data.updateTime);
+        const sourceDataUpdateTime = generateDateFromVatsimTimestamp(data.metaData.updateTime);
         const nextSourceDataUpdateTime = sourceDataUpdateTime + assumedSourceDataUpdateRateMs;
         const remainingTimeUntilSourceUpdate = nextSourceDataUpdateTime - Date.now();
         const minimumTimeToJoinThisCycleMs = 10000;
-        const additionalWaitTimeMs = 10000; // don't request data with everyone else
+        const additionalWaitTimeMs = 14000; // don't request data with everyone else
         let timeOfNextDataPull = nextSourceDataUpdateTime + additionalWaitTimeMs;
 
         if (remainingTimeUntilSourceUpdate < minimumTimeToJoinThisCycleMs) {
