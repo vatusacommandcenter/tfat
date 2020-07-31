@@ -103,10 +103,12 @@ function parsePilotConnections(rawData) {
 
     pilotConnections = vatsimParsedPilotConnectionData.length;
     const response = {
-        updateTime,
-        totalConnections,
-        pilotConnections,
-        data: vatsimParsedPilotConnectionData
+        data: vatsimParsedPilotConnectionData,
+        metaData: {
+            updateTime,
+            totalConnections,
+            pilotConnections
+        }
     };
 
     return response;

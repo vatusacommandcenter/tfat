@@ -14,8 +14,10 @@ export const DECIMAL_RADIX = 10;
  * @type {object}
  */
 export const EMPTY_VATSIM_DATA = {
-    updateTime: 0,
-    totalConnections: 0,
-    pilotConnections: 0,
-    data: []
+    data: [],
+    metaData: {
+        updateTime: 0,
+        totalConnections: 0,
+        pilotConnections: 0
+    }
 };

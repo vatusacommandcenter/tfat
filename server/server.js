@@ -4,7 +4,7 @@ import { EMPTY_VATSIM_DATA } from '../globalConstants.js';
 import getPilotData from './getPilotData.js';
 
 const app = express();
-let latestPilotData = EMPTY_VATSIM_DATA; // eslint-disable-line prefer-const
+let latestPilotData = EMPTY_VATSIM_DATA;
 
 app.get('/getUpdatedData', (req, res) => {
     res.send(latestPilotData);
@@ -24,27 +24,29 @@ app.listen(SERVER_PORT, () => {
  */
 export function updateLocalData() {
     return getPilotData().then((data) => {
-        if (!data || !data.updateTime) {
+        const existingMetaData = latestPilotData.metaData;
+        const nextMetaData = data.metaData;
+        if (!data || !nextMetaData.updateTime) {
             console.warn(`Received invalid pilot data from VATSIM: \n${data}`);
 
             return;
         }
 
-        if (data.updateTime === latestPilotData.updateTime) {
+        if (nextMetaData.updateTime === existingMetaData.updateTime) {
             console.log(`${data.updateTime} (no change-- discarded)`);
 
             return;
-        } else if (data.updateTime < latestPilotData.updateTime) {
+        } else if (nextMetaData.updateTime < existingMetaData.updateTime) {
             console.warn('Data hiccup from VATSIM! Fresh data is timestamped OLDER than data we already had! ' +
-                `Stored data timestamp: ${latestPilotData.updateTime}` +
-                `Received data timestamp: ${data.updateTime}`);
+                `Stored data timestamp: ${existingMetaData.updateTime}` +
+                `Received data timestamp: ${nextMetaData.updateTime}`);
 
             return;
         }
 
         latestPilotData = data;
 
-        console.log(latestPilotData.updateTime);
+        console.log(latestPilotData.metaData.updateTime);
 
         return data;
     }).catch((error) => {
