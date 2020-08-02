@@ -9,16 +9,18 @@
   },
   "type": "module",
   "scripts": {
-    "build": "npm run copyHtml && npm run webpack",
-    "build-dev": "npm run copyHtml && npm run webpack-dev",
-    "copyHtml": "copyfiles -f client/index.html public && copyfiles -f client/style/* public/style",
-    "OLDbuild": "copyfiles -f client/index.html public && babel client -d public",
+    "build": "npm run build-navData && npm run _copyHtml && npm run webpack",
+    "build-dev": "npm run _copyHtml && npm run webpack-dev",
+    "_OLDbuild": "copyfiles -f client/index.html public && babel client -d public",
+    "_copyHtml": "copyfiles -f client/index.html public && copyfiles -f client/style/* public/style",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node ./server/server.js",
+    "_navDataXmlJson": "xml-js client/navdata/airports.xml --out client/navdata/airports.json --compact && xml-js client/navdata/waypoints.xml --out client/navdata/waypoints.json --compact",
+    "build-navData": "npm run _navDataXmlJson && node devops/parseNavigationData.js",
     "nodemon": "nodemon ./server/server.js",
     "webpack": "webpack --mode=production client/client.js -o public/bundle.js",
     "webpack-dev": "webpack --mode=development client/client.js -o public/bundle.js --devtool=source-map",
-        "_note": "If webpack-dev becomes painfully slow, using `eval-source-map` will run faster, but will also show some duplicitave 'internal' source maps which may be annoying"
+    "_note": "If webpack-dev becomes painfully slow, using `eval-source-map` will run faster, but will also show some duplicitave 'internal' source maps which may be annoying"
   },
   "author": "Erik Quinn",
   "license": "MIT",
@@ -36,6 +38,7 @@
     "eslint-plugin-import": "^2.22.0",
     "nodemon": "^2.0.4",
     "webpack": "^4.44.0",
-    "webpack-cli": "^3.3.12"
+    "webpack-cli": "^3.3.12",
+    "xml-js": "^1.6.11"
   }
 }
