@@ -8,6 +8,7 @@
 import fs from 'fs';
 import path from 'path';
 import { DECIMAL_RADIX } from '../globalConstants.js';
+
 const navRelativePath = path.join(path.resolve(), 'client/navData');
 const waypointDataFilePath = path.join(navRelativePath, 'waypoints.json');
 const airportDataFilePath = path.join(navRelativePath, 'airports.json');
@@ -81,14 +82,14 @@ function parseAirportData() {
                 const runwayOtherEndPosition = {
                     lat: parseFloat(runway.EndLoc._attributes.Lat),
                     lon: parseFloat(runway.EndLoc._attributes.Lon)
-                }
-    
+                };
+
                 if (!runwayId || !runwayPosition || !runwayOtherEndPosition) {
                     console.warn(`Unable to parse a runway item, airport ${id}, Runway ${runwayId}`);
-    
+
                     continue;
                 }
-    
+
                 runways[runwayId] = {
                     position: runwayPosition,
                     otherEndPosition: runwayOtherEndPosition
@@ -102,14 +103,16 @@ function parseAirportData() {
 
             continue;
         }
-        
+
         if (id in parsedAirports) {
             console.warn(`Multiple airports found for id ${id}-- using the first one only.`);
 
             continue;
         }
 
-        parsedAirports[id] = { name, elevation, position, runways };
+        parsedAirports[id] = {
+            name, elevation, position, runways
+        };
     }
 
     return { airportDataInfo, parsedAirports };
@@ -140,7 +143,7 @@ const endFileWith = ';\n';
 const textToWriteToFile = `${startFileWith}${mainContent}${endFileWith}`;
 
 // write the file
-fs.writeFile(outputFilePath, textToWriteToFile, function(err) {
+fs.writeFile(outputFilePath, textToWriteToFile, (err) => {
     if (err) {
         return console.err(err);
     }
