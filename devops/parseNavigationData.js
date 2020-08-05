@@ -137,7 +137,7 @@ function parseNavigationData() {
 }
 
 // build the file
-const startFileWith = 'export const navData = ';
+const startFileWith = 'export const NAV_DATA = ';
 const mainContent = JSON.stringify(parseNavigationData());
 const endFileWith = ';\n';
 const textToWriteToFile = `${startFileWith}${mainContent}${endFileWith}`;

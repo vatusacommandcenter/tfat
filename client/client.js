@@ -5,11 +5,13 @@ import AircraftCollection from './AircraftCollection.js';
 import AircraftTableView from './AircraftTableView.js';
 import TimeStampView from './TimeStampView.js';
 import ClockView from './ClockView.js';
+import NavigationLibrary from './navData/NavigationLibrary.js';
 
 const aircraftCollection = new AircraftCollection();
 const aircraftTableView = new AircraftTableView(aircraftCollection);
 const timeStampView = new TimeStampView();
 const clockView = new ClockView();
+const navigationLibrary = new NavigationLibrary();
 
 function getAircraftToShow() {
     // return JSON.stringify(latestDownload);
