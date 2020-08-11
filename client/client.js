@@ -5,13 +5,11 @@ import AircraftCollection from './AircraftCollection.js';
 import AircraftTableView from './AircraftTableView.js';
 import TimeStampView from './TimeStampView.js';
 import ClockView from './ClockView.js';
-import NavigationLibrary from './navData/NavigationLibrary.js';
 
 const aircraftCollection = new AircraftCollection();
 const aircraftTableView = new AircraftTableView(aircraftCollection);
 const timeStampView = new TimeStampView();
 const clockView = new ClockView();
-const navigationLibrary = new NavigationLibrary();
 
 function getAircraftToShow() {
     // return JSON.stringify(latestDownload);
@@ -31,6 +29,9 @@ function getAircraftToShow() {
     // const mbpv = `MBPV:   ${JSON.stringify(filterPilotsByDestinationGroup('MBPV'))}`;
     // const aircraftToShow = `${mia}\n\n${tpa}\n\n${pbi}\n\n${rsw}\n\n${nqx}\n\n` +
     //     `${f11}\n\n${jax}\n\n${dab}\n\n${mygf}\n\n${mynn}\n\n${mbpv}`;
+    mia._list.forEach((ac) => {
+        console.log(ac._fixes.map((f) => f.id).join(' '));
+    });
 
     return mia;
 }

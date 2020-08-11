@@ -1,6 +1,6 @@
 import { NAV_DATA } from './navigationData.js';
 
-export default class NavigationLibrary {
+class NavigationLibrary {
     constructor() {
         this._airportInfo = NAV_DATA.airportInfo;
         this._airports = NAV_DATA.airports;
@@ -84,4 +84,30 @@ export default class NavigationLibrary {
 
         return listOfPriorityTypedItems[0];
     }
+
+    getPositionOfAirport(icao) {
+        if (!(icao in this._airports)) {
+            if (icao in this._fixes) {
+                if (Array.isArray(this._fixes[icao])) {
+                    console.warn(`Attempted to get location of airport ${icao}, but there are no airport ` +
+                        'definitions and MULTIPLE listings of this identifier in the FIX list. Using the ' +
+                        `first one: ${JSON.stringify(this._fixes[icao][0])}`);
+
+                    return this._fixes[icao][0].position;
+                }
+                console.warn(`Attempted to get location of airport ${icao}, but there are no airport ` +
+                    'definitions for it. Using the position defined for this airport found in the fix ' +
+                    `list: ${JSON.stringify(this._fixes[icao])}`);
+
+                return this._fixes[icao].position;
+            }
+            console.warn(`Unable to determine location of airport ${icao}`);
+
+            return undefined;
+        }
+
+        return this._airports[icao].position;
+    }
 }
+
+export default new NavigationLibrary();

@@ -21,7 +21,9 @@ export default class Aircraft {
     }
 
     _initFixes() {
-        this._fixes = this._getFixesOnRoute();
+        this._fixes = [NavigationLibrary.getPositionOfAirport(this.fpOrigin)];
+        this._fixes.push(this._getFixesOnRoute());
+        this._fixes.push(NavigationLibrary.getPositionOfAirport(this.destination));
     }
 
     /**
