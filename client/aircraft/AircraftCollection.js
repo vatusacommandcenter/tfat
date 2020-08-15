@@ -1,5 +1,5 @@
 import Aircraft from './Aircraft.js';
-import { DESTINATION_GROUP } from './clientConstants.js';
+import { DESTINATION_GROUP } from '../constants/clientConstants.js';
 
 export default class AircraftCollection {
     /**
@@ -84,7 +84,7 @@ export default class AircraftCollection {
             throw new TypeError(`Download metadata invalid! Received: ${metaData}`);
         }
 
-        const newList = [];
+        const nextList = [];
 
         for (const aircraftData of downloadedData) {
             if (!aircraftData) {
@@ -95,10 +95,10 @@ export default class AircraftCollection {
 
             const aircraftModel = new Aircraft(aircraftData);
 
-            newList.push(aircraftModel);
+            nextList.push(aircraftModel);
         }
 
-        this._list = newList;
+        this._list = nextList;
         this._metaData = metaData;
     }
 

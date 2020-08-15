@@ -1,4 +1,4 @@
-import { CLOCK_UPDATE_INTERVAL } from './clientConstants.js';
+import { CLOCK_UPDATE_INTERVAL } from '../constants/clientConstants.js';
 
 export default class ClockView {
     constructor() {

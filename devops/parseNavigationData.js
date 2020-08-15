@@ -41,8 +41,12 @@ function parseWaypointData() {
             continue;
         }
 
+        // TODO: Use `FixModel` for all waypoint/vor/ndb/etc
         parsedWaypointList.push({ id, type, position });
     }
+
+    const types = [...new Set(parsedWaypointList.map((wp) => wp.type))];
+    console.log(types);
 
     return { waypointDataInfo, parsedWaypointList };
 }

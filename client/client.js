@@ -1,10 +1,10 @@
 import {
     DATA_UPDATE_INTERVAL
-} from './clientConstants.js';
-import AircraftCollection from './AircraftCollection.js';
-import AircraftTableView from './AircraftTableView.js';
-import TimeStampView from './TimeStampView.js';
-import ClockView from './ClockView.js';
+} from './constants/clientConstants.js';
+import AircraftCollection from './aircraft/AircraftCollection.js';
+import AircraftTableView from './views/AircraftTableView.js';
+import ClockView from './views/ClockView.js';
+import TimeStampView from './views/TimeStampView.js';
 
 const aircraftCollection = new AircraftCollection();
 const aircraftTableView = new AircraftTableView(aircraftCollection);
@@ -29,9 +29,10 @@ function getAircraftToShow() {
     // const mbpv = `MBPV:   ${JSON.stringify(filterPilotsByDestinationGroup('MBPV'))}`;
     // const aircraftToShow = `${mia}\n\n${tpa}\n\n${pbi}\n\n${rsw}\n\n${nqx}\n\n` +
     //     `${f11}\n\n${jax}\n\n${dab}\n\n${mygf}\n\n${mynn}\n\n${mbpv}`;
-    mia._list.forEach((ac) => {
-        console.log(ac._fixes.map((f) => f.id).join(' '));
-    });
+
+    // mia._list.forEach((ac) => {
+    //     console.log(ac._route._waypoints.map((f) => f.icao).join(' '));
+    // });
 
     return mia;
 }

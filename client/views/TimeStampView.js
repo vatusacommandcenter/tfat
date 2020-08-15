@@ -1,5 +1,5 @@
-import { CLOCK_UPDATE_INTERVAL } from './clientConstants.js';
-import { generateDateFromVatsimTimestamp } from '../server/serverUtilities.js';
+import { CLOCK_UPDATE_INTERVAL } from '../constants/clientConstants.js';
+import { generateDateFromVatsimTimestamp } from '../../server/serverUtilities.js';
 
 export default class TimeStampView {
     constructor() {
