@@ -116,3 +116,13 @@ export const SOURCE_DATA_WAYPOINT_TYPES = {
      */
     VOR: 'VOR'
 };
+
+/**
+ * The maximum angle of turn from course inbound to fix to still draw the aircraft's
+ * trajectory as direct to the fix. If in excess of this angle, the trajectory will
+ * assume that this fix is being skipped.
+ *
+ * @enum MAX_TURN_ANGLE_BEFORE_SKIPPING_FIX_DEG
+ * @type {number} - angle in degrees
+ */
+export const MAX_TURN_ANGLE_BEFORE_SKIPPING_FIX_DEG = 100;

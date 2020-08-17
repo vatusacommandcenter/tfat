@@ -25,7 +25,11 @@
   "author": "Erik Quinn",
   "license": "MIT",
   "dependencies": {
+    "@turf/bearing": "^6.0.1",
+    "@turf/distance": "^6.0.1",
+    "@turf/helpers": "^6.1.4",
     "express": "^4.17.1",
+    "lodash": "^4.17.20",
     "node-fetch": "^2.6.0"
   },
   "devDependencies": {

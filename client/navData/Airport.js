@@ -13,15 +13,17 @@ export default class Airport {
     }
 
     /**
-     * Position of this waypoint, specified in `[lat, lon]` format
+     * Position of this waypoint, specified in `[lon, lat]` format
      * For the position in `{lat: 41.7, lon: -80.2}` format, use `.position`
      *
+     * The order is important-- [lon, lat] is the GeoJSON-specified order used by Turf.js for maths
+     *
      * @for Fix
-     * @property coordinates
-     * @type {array} - [lat, lon]
+     * @property coordinatesLonLat
+     * @type {array} - [lon, lat]
      */
-    get coordinates() {
-        return [this._position.lat, this._position.lon];
+    get coordinatesLonLat() {
+        return [this._position.lon, this._position.lat];
     }
 
     /**
@@ -38,7 +40,7 @@ export default class Airport {
 
     /**
      * Position of this fix, specified in `{lat: 41.7, lon: -80.2}` format
-     * For the position in `[lat, lon]` format, use `.coordinates`
+     * For the position in `[lon, lat]` format, use `.coordinatesLonLat`
      *
      * @for Fix
      * @property position

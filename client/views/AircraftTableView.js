@@ -20,7 +20,7 @@ export default class AircraftTableView {
          * @type {number}
          * @private
          */
-        this._columnLabels = ['callsign', 'type', 'origin', 'dest', 'altitude', 'groundspeed'];
+        this._columnLabels = ['callsign', 'type', 'origin', 'dest', 'altitude', 'route length'];
 
         this._tableHead = '';
 
