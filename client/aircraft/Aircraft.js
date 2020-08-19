@@ -6,26 +6,28 @@ export default class Aircraft {
      * @constructor
      * @param {object} aircraftData
      */
-    constructor(aircraftData) {
+    constructor(aircraftData, updateTime) {
         for (const key in aircraftData) {
             this[key] = aircraftData[key];
         }
 
         this._route = null;
 
-        this._init();
+        this._init(updateTime);
     }
 
-    _init() {
-        const origin = this.fpOrigin;
-        const routeString = this.fpRoute;
-        const { destination } = this;
-        const aircraftPosition = this.position;
+    get eta() {
+        return this._route.eta;
+    }
+
+    _init(updateTime) {
         this._route = new Route({
-            aircraftPosition,
-            destination,
-            origin,
-            routeString
+            aircraftPosition: this.position,
+            destination: this.destination,
+            groundSpeed: this.groundSpeed,
+            origin: this.fpOrigin,
+            routeString: this.fpRoute,
+            updateTime
         });
     }
 
@@ -71,7 +73,8 @@ export default class Aircraft {
         const currentLatLon = `${this.latitude},${this.longitude}`;
         const url = `https://skyvector.com/?ll=${currentLatLon}&chart=304&zoom=10&fpl=%20` +
             `${this._route._waypoints.map((wp) => wp.icao).join('%20')}`;
-        const ahref = `<a href="${url}" target="_blank">${this._route.getFullRouteLength()} nm</a>`;
+        const text = `${this._route.getFullRouteLength()} nm | ETA: ${this.eta.toUTCString()}`;
+        const ahref = `<a href="${url}" target="_blank">${text}</a>`;
 
         const html = `<tr><td>${this.callsign}</td><td>${this.fpAircraft}</td><td>${this.fpOrigin}</td>` +
             // `<td>${this.destination}</td><td>${this.altitude}</td><td>${this.groundSpeed}</td></tr>`;

@@ -1,21 +1,29 @@
-import { lineString, convertLength, bearingToAzimuth } from '@turf/helpers';
+import _last from 'lodash/last.js';
 import bearing from '@turf/bearing';
 import distance from '@turf/distance';
+import { lineString, convertLength, bearingToAzimuth } from '@turf/helpers';
 import NavigationLibrary from '../navData/NavigationLibrary.js';
 import Waypoint from './Waypoint.js';
 import { TURF_LENGTH_UNIT } from '../constants/turfConstants.js';
 import { calculateAngleDifference, distanceNm } from '../clientUtilities.js';
 import { MAX_TURN_ANGLE_BEFORE_SKIPPING_FIX_DEG } from '../constants/routeConstants.js';
+import { TIME } from '../../globalConstants.js';
 
 export default class Route {
     constructor(data) {
         this._origin = data.origin;
         this._destination = data.destination;
+        this._groundSpeedOfAircraft = data.groundSpeed;
         this._routeString = data.routeString;
         this._turfLineString = null;
+        this._updateTime = data.updateTime;
         this._waypoints = [];
 
         this._init(data);
+    }
+
+    get eta() {
+        return _last(this._waypoints).time;
     }
 
     /**
@@ -71,9 +79,11 @@ export default class Route {
             this._waypoints.push(destinationAirportWaypoint);
         }
 
-        this._initWaypointHeadings();
-        this._initWaypointDistances();
+        this._initWaypointHeadings(); // these headings are used by ._insertCurrentPosition()
         this._insertCurrentPosition(aircraftPosition);
+        // if you want to add any `Waypoint`s, do so here, BEFORE calculating the distances (else they'll be wrong)
+        this._initWaypointDistances(); // calculate distances now that additional waypoints have been added
+        this._initWaypointTimes(); // calculate time estimates over all fixes (including prior ones)
     }
 
     _initWaypointDistances() {
@@ -109,6 +119,57 @@ export default class Route {
     }
 
     /**
+     * Initialize time estimates over each `Waypoint` in the `Route`
+     *
+     * @for Route
+     * @method _initWaypointTimes
+     * @returns {undefined}
+     * @private
+     */
+    _initWaypointTimes() {
+        if (this._waypoints.length === 0) {
+            return;
+        }
+
+        const currentWaypointIndex = this._getCurrentWaypointIndex();
+
+        // set data's update time as the time the aircraft is at its present position
+        this._waypoints[currentWaypointIndex].time = this._updateTime;
+
+        // calculate and set times from aircraft's present position BACKWARD to origin
+        for (let i = currentWaypointIndex - 1; i > -1; i--) {
+            const originSideWaypoint = this._waypoints[i];
+            const destSideWaypoint = this._waypoints[i + 1];
+            const distance = distanceNm(destSideWaypoint.turfPoint, originSideWaypoint.turfPoint);
+            const travelTimeMs = distance / this._groundSpeedOfAircraft * TIME.ONE_HOUR_IN_MILLISECONDS;
+            const timeAtOriginSideWaypoint = new Date(destSideWaypoint.time.getTime() - travelTimeMs);
+            originSideWaypoint.time = timeAtOriginSideWaypoint;
+        }
+
+        // calculate and set times from aircraft's present position FORWARD to destination
+        for (let i = currentWaypointIndex + 1; i < this._waypoints.length; i++) {
+            const originSideWaypoint = this._waypoints[i - 1];
+            const destSideWaypoint = this._waypoints[i];
+            const distance = distanceNm(originSideWaypoint.turfPoint, destSideWaypoint.turfPoint);
+            const travelTimeMs = distance / this._groundSpeedOfAircraft * TIME.ONE_HOUR_IN_MILLISECONDS;
+            const timeAtDestSideWaypoint = new Date(originSideWaypoint.time.getTime() + travelTimeMs);
+            destSideWaypoint.time = timeAtDestSideWaypoint;
+        }
+    }
+
+    /**
+     * Return the index of the waypoint representing the aircraft's CURRENT POSITION
+     *
+     * @for Route
+     * @method _getCurrentWaypointIndex
+     * @returns {number}
+     * @private
+     */
+    _getCurrentWaypointIndex() {
+        return this._waypoints.findIndex((wp) => wp.isAircraftPosition);
+    }
+
+    /**
      * Insert the provided aircraft current position as a waypoint at the appropriate position within the waypoint list
      *
      * @for Route
@@ -118,7 +179,8 @@ export default class Route {
      * @private
      */
     _insertCurrentPosition(aircraftPosition) {
-        const aircraftPositionWaypoint = new Waypoint(aircraftPosition);
+        const isAircraftPosition = true;
+        const aircraftPositionWaypoint = new Waypoint(aircraftPosition, isAircraftPosition);
 
         if (this._waypoints.length === 0) {
             this._waypoints.push(aircraftPositionWaypoint);

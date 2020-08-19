@@ -12,9 +12,11 @@ import { WAYPOINT_TYPES } from '../constants/routeConstants.js';
  * @class Waypoint
  */
 export default class Waypoint {
-    constructor(data) {
+    constructor(data, isAircraftPosition = false) {
         this.distanceFromPreviousWaypoint = 0; // set by the `Route`
         this.headingToNextWaypoint = null; // set by the `Route`
+        this.time = null; // set by the `Route`
+        this._isAircraftPosition = isAircraftPosition;
         this._navDataRef = null;
         this._position = { lat: 0, lon: 0 };
         this._turfPoint = null;
@@ -55,6 +57,17 @@ export default class Waypoint {
         }
 
         return this._navDataRef.icao;
+    }
+
+    /**
+     * Boolean value representing whether or not `this` waypoint is the one created at the Aircraft's current position
+     *
+     * @for Waypoint
+     * @property isAircraftPosition
+     * @type {boolean}
+     */
+    get isAircraftPosition() {
+        return this._isAircraftPosition;
     }
 
     /**
@@ -114,7 +127,8 @@ export default class Waypoint {
         this._navDataRef = null;
         this._position = coordinates;
         this._type = WAYPOINT_TYPES.GPS;
-        this._turfPoint = point([this._position.lon, this._position.lat], { icao: '[PPOS]' });
+        this._turfPoint = point([this._position.lon, this._position.lat], { icao: '[GPS]' });
+
         this._navDataRef = { icao: `${this._position.lat}/${this._position.lon}` }; // FIXME: delete me!!!!!
     }
 

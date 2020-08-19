@@ -55,47 +55,47 @@ function parsePilotConnections(rawData) {
         const fields = line.split(':');
         const pilotInfo = {
             /* eslint-disable no-multi-spaces */
-            callsign: fields[0],    // callsign
-            cid: fields[1],         // VATSIM CID
-            name: fields[2],        // name used when connecting
-            clientType: fields[3],  // either "PILOT" or "ATC"
-            frequency: fields[4],   // controller connections only, shows "prim" freq
-            latitude: fields[5],    // decimal degrees N
-            longitude: fields[6],   // decimal degrees E
-            altitude: fields[7],    // feet above MSL
-            groundSpeed: fields[8], // groundspeed in knots
-            fpAircraft: fields[9],  // aircraft type ICAO identifier
-            cruiseTas: fields[10],  // filed true airspeed at cruise
-            fpOrigin: fields[11],   // origin airport ICAO identifier
-            fpCruiseAltitude: fields[12],   // cruise altitude in flight plan
-            destination: fields[13],    // destination airport ICAO identifier
-            server: fields[14],         // which VATSIM server they're using
-            protrevision: fields[15],   // useless, everybody has the same value
-            rating: fields[16],         // rating
-            currentSquawk: fields[17],  // transponder code they're currently on
-            facilityType: fields[18],   // controller connections only, shows DEL/GND/TWR/etc
-            visualRange: fields[19],    // controller connections only, shows vis range
-            fpRevision: fields[20],     // revision number of flight plan
-            fpFlightRules: fields[21],  // flight rules selected in flight plan (IFR or VFR)
-            fpDepartureTimeScheduled: fields[22],   // time in FP to depart origin airport (z)
-            fpDepartureTimeActual: fields[23],      // does not appear for most aircraft (why?)
-            fpEnRouteTime: fields[24],  // time in FP from origin to destination
-            fpMinEnroute: fields[25],   // seems like mins enroute, but values are all ~0-50 (why?)
-            fpHoursFuel: fields[26],    // hours fuel on board, in addition to fpMinsFuel
-            fpMinsFuel: fields[27],     // minutes of fuel on board, in addition to fpHoursFuel
-            fpAlternateDestination: fields[28],   // alternate landing airport
-            fpRemarks: fields[29],      // flight plan remarks
-            fpRoute: fields[30],        // flight plan route
-            originLat: fields[31],      // latitude of the FP origin airport
-            originLon: fields[32],      // longitude of the FP origin airport
-            destinationLat: fields[33], // latitude of the FP destination airport
-            destinationLon: fields[34], // longitude of the FP destination airport
-            atisMessage: fields[35],    // controller connections only
+            callsign: fields[0],                // callsign
+            cid: parseFloat(fields[1]),         // VATSIM CID
+            name: fields[2],                    // name used when connecting
+            clientType: fields[3],              // either "PILOT" or "ATC"
+            frequency: fields[4],               // controller connections only, shows "prim" freq
+            latitude: parseFloat(fields[5]),    // decimal degrees N
+            longitude: parseFloat(fields[6]),   // decimal degrees E
+            altitude: parseFloat(fields[7]),    // feet above MSL
+            groundSpeed: parseFloat(fields[8]), // groundspeed in knots
+            fpAircraft: fields[9],              // aircraft type ICAO identifier
+            cruiseTas: parseFloat(fields[10]),  // filed true airspeed at cruise
+            fpOrigin: fields[11],               // origin airport ICAO identifier
+            fpCruiseAltitude: parseFloat(fields[12]), // cruise altitude in flight plan
+            destination: fields[13],            // destination airport ICAO identifier
+            server: fields[14],                 // which VATSIM server they're using
+            protrevision: fields[15],           // useless, everybody has the same value
+            rating: fields[16],                 // rating
+            currentSquawk: fields[17],          // transponder code they're currently on
+            facilityType: fields[18],           // controller connections only, shows DEL/GND/TWR/etc
+            visualRange: fields[19],            // controller connections only, shows vis range
+            fpRevision: fields[20],             // revision number of flight plan
+            fpFlightRules: fields[21],          // flight rules selected in flight plan (IFR or VFR)
+            fpDepartureTimeScheduled: fields[22], // time in FP to depart origin airport (z)
+            fpDepartureTimeActual: fields[23],  // does not appear for most aircraft (why?)
+            fpEnRouteTime: fields[24],          // time in FP from origin to destination
+            fpMinEnroute: fields[25],           // seems like mins enroute, but values are all ~0-50 (why?)
+            fpHoursFuel: fields[26],            // hours fuel on board, in addition to fpMinsFuel
+            fpMinsFuel: fields[27],             // minutes of fuel on board, in addition to fpHoursFuel
+            fpAlternateDestination: fields[28], // alternate landing airport
+            fpRemarks: fields[29],              // flight plan remarks
+            fpRoute: fields[30],                // flight plan route
+            originLat: parseFloat(fields[31]),  // latitude of the FP origin airport
+            originLon: parseFloat(fields[32]),  // longitude of the FP origin airport
+            destinationLat: parseFloat(fields[33]), // latitude of the FP destination airport
+            destinationLon: parseFloat(fields[34]), // longitude of the FP destination airport
+            atisMessage: fields[35],            // controller connections only
             timeLastAtisReceived: fields[36],   // not used by pilot connections
-            logonTime: fields[37],  // time this user connected to the network (z)
-            heading: fields[38],    // current heading (actual heading or ground track?)
-            inHg: fields[39],       // current altimeter setting, inches of mercury
-            hPa: fields[40]         // current altimeter setting, hPa (milibars)
+            logonTime: fields[37],              // time this user connected to the network (z)
+            heading: parseFloat(fields[38]),    // current heading (actual heading or ground track?)
+            inHg: parseFloat(fields[39]),       // current altimeter setting, inches of mercury
+            hPa: parseFloat(fields[40])         // current altimeter setting, hPa (milibars)
         };
 
         vatsimParsedPilotConnectionData.push(pilotInfo);
