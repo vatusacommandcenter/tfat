@@ -1,11 +1,11 @@
-import {
-    DATA_UPDATE_INTERVAL
-} from './constants/clientConstants.js';
+import { DATA_UPDATE_INTERVAL } from './constants/clientConstants.js';
 import AircraftCollection from './aircraft/AircraftCollection.js';
 import AircraftTableView from './views/AircraftTableView.js';
 import ClockView from './views/ClockView.js';
 import TimeStampView from './views/TimeStampView.js';
+import OrganizationCollection from './organization/OrganizationCollection.js';
 
+const organizationCollection = new OrganizationCollection();
 const aircraftCollection = new AircraftCollection();
 const aircraftTableView = new AircraftTableView(aircraftCollection);
 const timeStampView = new TimeStampView();
