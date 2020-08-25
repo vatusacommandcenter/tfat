@@ -19,6 +19,24 @@ export default class Waypoint {
         this._isAircraftPosition = isAircraftPosition;
         this._navDataRef = null;
         this._position = { lat: 0, lon: 0 };
+
+        /**
+         * Array of `Sector`s whose boundaries are at this waypoint's location
+         *
+         * @for Waypoint
+         * @property sectorBoundaryPolygons
+         * @type {array<turf.Polygon>}
+         */
+        this.sectorBoundaryPolygons = [];
+
+        /**
+         * Data representing which sector we are entering/exiting upon passing over this waypoint
+         *
+         * @for Waypoint
+         * @property _sectorChange
+         * @type {object}
+         */
+        this.sectorChange = { enter: [], exit: [] };
         this._turfPoint = null;
         this._type = WAYPOINT_TYPES.GPS;
 
@@ -53,21 +71,14 @@ export default class Waypoint {
      */
     get icao() {
         if (this._navDataRef === null) {
+            if (this._turfPoint.properties.icao === '[GPS]') {
+                return this._turfPoint.properties.latLon;
+            }
+
             return null;
         }
 
         return this._navDataRef.icao;
-    }
-
-    /**
-     * Boolean value representing whether or not `this` waypoint is the one created at the Aircraft's current position
-     *
-     * @for Waypoint
-     * @property isAircraftPosition
-     * @type {boolean}
-     */
-    get isAircraftPosition() {
-        return this._isAircraftPosition;
     }
 
     /**
@@ -109,6 +120,14 @@ export default class Waypoint {
         this._initAsGps(data);
     }
 
+    /**
+     * Initialize this `Waypoint` instance as an airport-based waypoint
+     *
+     * @for Waypoint
+     * @method _initAsAirport
+     * @param {Airport} airport
+     * @returns undefined
+     */
     _initAsAirport(airport) {
         this._navDataRef = airport;
         this._position = airport.position;
@@ -116,6 +135,14 @@ export default class Waypoint {
         this._turfPoint = point(this._navDataRef.coordinatesLonLat, { icao: this._navDataRef.icao });
     }
 
+    /**
+     * Initialize this `Waypoint` instance as a fix-based waypoint
+     *
+     * @for Waypoint
+     * @method _initAsFix
+     * @param {Fix} fix
+     * @returns undefined
+     */
     _initAsFix(fix) {
         this._navDataRef = fix;
         this._position = fix.position;
@@ -123,13 +150,61 @@ export default class Waypoint {
         this._turfPoint = point(this._navDataRef.coordinatesLonLat, { icao: this._navDataRef.icao });
     }
 
-    _initAsGps(coordinates) {
+    /**
+     * Initialize this `Waypoint` instance as a GPS waypoint, not based on a Fix/Airport
+     *
+     * @for Waypoint
+     * @method _initAsGps
+     * @param {*} data - {lat, lon, (poly) }, where `poly` is optional
+     * @returns undefined
+     */
+    _initAsGps(data) {
         this._navDataRef = null;
-        this._position = coordinates;
+        this._position = { lat: data.lat, lon: data.lon };
         this._type = WAYPOINT_TYPES.GPS;
-        this._turfPoint = point([this._position.lon, this._position.lat], { icao: '[GPS]' });
+        this._turfPoint = point(
+            [this._position.lon, this._position.lat],
+            { icao: '[GPS]', latLon: `${this._position.lat}/${this._position.lon}` }
+        );
 
-        this._navDataRef = { icao: `${this._position.lat}/${this._position.lon}` }; // FIXME: delete me!!!!!
+        if ('poly' in data) {
+            this.sectorBoundaryPolygons.push(data.poly);
+        }
+    }
+
+    /**
+     * Boolean value representing whether or not `this` waypoint is the one created at the Aircraft's current position
+     *
+     * @for Waypoint
+     * @method isAircraftPosition
+     * @returns {boolean}
+     */
+    isAircraftPosition() {
+        return this._isAircraftPosition;
+    }
+
+    isAirport() {
+        return this._type === WAYPOINT_TYPES.AIRPORT;
+    }
+
+    isFix() {
+        return this._type === WAYPOINT_TYPES.FIX;
+    }
+
+    isGps() {
+        return this._type === WAYPOINT_TYPES.GPS;
+    }
+
+    /**
+     * Returns whether the provided waypoint has the same lat/lon position as this `Waypoint`
+     *
+     * @for Waypoint
+     * @method isCollocatedWithWaypoint
+     * @param {Waypoint} otherWaypoint
+     * @returns {boolean}
+     */
+    isCollocatedWithWaypoint(otherWaypoint) {
+        return otherWaypoint.position.lat === this._position.lat && otherWaypoint.position.lon === this._position.lon;
     }
 
     // headingToWaypoint() {

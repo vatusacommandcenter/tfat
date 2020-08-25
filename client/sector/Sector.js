@@ -1,12 +1,17 @@
 import { lineString } from '@turf/helpers';
 import lineToPolygon from '@turf/line-to-polygon';
+import lineIntersect from '@turf/line-intersect';
 
 export default class Sector {
     constructor(id, data) {
         this._polygons = [];
-        this._sectorIdentifier = id;
+        this._id = id;
 
         this._init(data);
+    }
+
+    get id() {
+        return this._id;
     }
 
     _init(data) {
@@ -27,10 +32,42 @@ export default class Sector {
 
             const pointsLonLat = poly.coordinates.map((coord) => [coord[1], coord[0]]);
             const turfLineString = lineString(pointsLonLat);
-            const turfPoly = lineToPolygon(turfLineString, { properties: { altitudes: poly.altitudes } });
+
+            // creating a circular dependency between `this` and `this.turfPoly`. I know, I know, this is bad! But
+            // it seems to be the simplest solution at the moment. I can live with it for now.
+            const turfPoly = lineToPolygon(turfLineString, { properties: { altitudes: poly.altitudes, sector: this, poly } });
 
             this._polygons.push(turfPoly);
         }
+    }
+
+    /**
+     * Return data regarding the locations at which the specified line intersects each of this Sector's polygons
+     *
+     * @for Sector
+     * @method getIntersectionsWithTurfLineString
+     * @param {turf.lineString} turfLineString
+     * @returns {array<object>} - [{ 'point': turf.Point, 'poly': turf.Polygon }, ...]
+     */
+    getIntersectionsWithTurfLineString(turfLineString) {
+        const intersections = [];
+
+        for (const poly of this._polygons) {
+            let intersectingPoints = lineIntersect(turfLineString, poly);
+
+            if (intersectingPoints.features.length === 0) {
+                continue;
+            }
+
+            // add polygon data to return value
+            intersectingPoints = intersectingPoints.features.map((feature) => {
+                return { point: feature, poly };
+            });
+
+            intersections.push(...intersectingPoints);
+        }
+
+        return intersections;
     }
 }
 

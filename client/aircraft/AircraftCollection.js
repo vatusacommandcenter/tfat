@@ -10,7 +10,7 @@ export default class AircraftCollection {
      * @constructor
      * @chainable
      */
-    constructor() {
+    constructor(organizationCollection) {
         /**
          * An array containing all `Aircraft` received from the VATSIM data download
          *
@@ -76,60 +76,9 @@ export default class AircraftCollection {
             totalConnections: 0
         };
 
+        this._organizationCollection = organizationCollection;
+
         return this;
-    }
-
-    /**
-     * Fill the `AircraftCollection` with `Aircraft` generated from the provided data
-     *
-     * @for AircraftCollection
-     * @method updateCollection
-     * @param {array<object>} downloadedData - raw download data from the server (NOT `Aircraft` INSTANCES!)
-     * @param {object} metaData - information on the latest download (generated time, connection counts, etc)
-     */
-    updateCollection({ data: downloadedData, metaData }) {
-        if (!Array.isArray(downloadedData) || downloadedData.length === 0) {
-            throw new TypeError(`Download data invalid! Received: ${downloadedData}`);
-        }
-
-        if (!(typeof metaData === 'object') || !metaData.updateTime) {
-            throw new TypeError(`Download metadata invalid! Received: ${metaData}`);
-        }
-
-        metaData.updateTimeObj = new Date(generateDateFromVatsimTimestamp(metaData.updateTime));
-        const nextList = [];
-
-        for (const aircraftData of downloadedData) {
-            if (!aircraftData) {
-                console.error(`Error reading aircraft data: ${aircraftData}`);
-
-                continue;
-            }
-
-            const aircraftModel = new Aircraft(aircraftData, metaData.updateTimeObj);
-
-            nextList.push(aircraftModel);
-        }
-
-        this._list = nextList;
-        this._metaData = metaData;
-    }
-
-    /**
-     * Return a new `AircraftCollection` instance from `this`, containing only the `Aircraft` provided
-     *
-     * @for AircraftCollection
-     * @method generateNewCollectionWithAircraft
-     * @param {array<Aircraft>} aircraftList - An array of `Aircraft` instances (NOT
-     *      VATSIM DATA!) from which to form a new `AircraftCollection`
-     * @returns {AircraftCollection}
-     */
-    generateNewCollectionWithAircraft(aircraftList) {
-        const nextAircraftCollection = new AircraftCollection();
-        nextAircraftCollection._list = aircraftList;
-        nextAircraftCollection._metaData = this._metaData;
-
-        return nextAircraftCollection;
     }
 
     /**
@@ -152,20 +101,6 @@ export default class AircraftCollection {
      */
     get updateTime() {
         return this._metaData.updateTime;
-    }
-
-    /**
-     * Return html table body data for the entry for all `Aircraft` in `this` collection
-     *
-     * @for AircraftCollection
-     * @method getTableBodyHTML
-     * @return {string} - can be directly used with .innerHtml() to create a table body
-     */
-    getTableBodyHTML() {
-        const tableRows = this._list.map((ac) => ac.getTableRowHtml());
-        const tableBody = tableRows.join('');
-
-        return tableBody;
     }
 
     /**
@@ -206,5 +141,72 @@ export default class AircraftCollection {
         const filteredAircraftCollection = this.generateNewCollectionWithAircraft(aircraftList);
 
         return filteredAircraftCollection;
+    }
+
+    /**
+     * Return a new `AircraftCollection` instance from `this`, containing only the `Aircraft` provided
+     *
+     * @for AircraftCollection
+     * @method generateNewCollectionWithAircraft
+     * @param {array<Aircraft>} aircraftList - An array of `Aircraft` instances (NOT
+     *      VATSIM DATA!) from which to form a new `AircraftCollection`
+     * @returns {AircraftCollection}
+     */
+    generateNewCollectionWithAircraft(aircraftList) {
+        const nextAircraftCollection = new AircraftCollection(this._organizationCollection);
+        nextAircraftCollection._list = aircraftList;
+        nextAircraftCollection._metaData = this._metaData;
+
+        return nextAircraftCollection;
+    }
+
+    /**
+     * Return html table body data for the entry for all `Aircraft` in `this` collection
+     *
+     * @for AircraftCollection
+     * @method getTableBodyHTML
+     * @return {string} - can be directly used with .innerHtml() to create a table body
+     */
+    getTableBodyHTML() {
+        const tableRows = this._list.map((ac) => ac.getTableRowHtml());
+        const tableBody = tableRows.join('');
+
+        return tableBody;
+    }
+
+    /**
+     * Fill the `AircraftCollection` with `Aircraft` generated from the provided data
+     *
+     * @for AircraftCollection
+     * @method updateCollection
+     * @param {array<object>} downloadedData - raw download data from the server (NOT `Aircraft` INSTANCES!)
+     * @param {object} metaData - information on the latest download (generated time, connection counts, etc)
+     */
+    updateCollection({ data: downloadedData, metaData }) {
+        if (!Array.isArray(downloadedData) || downloadedData.length === 0) {
+            throw new TypeError(`Download data invalid! Received: ${downloadedData}`);
+        }
+
+        if (!(typeof metaData === 'object') || !metaData.updateTime) {
+            throw new TypeError(`Download metadata invalid! Received: ${metaData}`);
+        }
+
+        metaData.updateTimeObj = new Date(generateDateFromVatsimTimestamp(metaData.updateTime));
+        const nextList = [];
+
+        for (const aircraftData of downloadedData) {
+            if (!aircraftData) {
+                console.error(`Error reading aircraft data: ${aircraftData}`);
+
+                continue;
+            }
+
+            const aircraftModel = new Aircraft(aircraftData, metaData.updateTimeObj, this._organizationCollection);
+
+            nextList.push(aircraftModel);
+        }
+
+        this._list = nextList;
+        this._metaData = metaData;
     }
 }

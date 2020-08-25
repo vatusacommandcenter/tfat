@@ -6,25 +6,27 @@ export default class Aircraft {
      * @constructor
      * @param {object} aircraftData
      */
-    constructor(aircraftData, updateTime) {
+    constructor(aircraftData, updateTime, organizationCollection) {
         for (const key in aircraftData) {
             this[key] = aircraftData[key];
         }
 
         this._route = null;
 
-        this._init(updateTime);
+        this._init(updateTime, organizationCollection);
     }
 
     get eta() {
         return this._route.eta;
     }
 
-    _init(updateTime) {
+    _init(updateTime, organizationCollection) {
+        if (this.callsign === 'SIL94') debugger;
         this._route = new Route({
             aircraftPosition: this.position,
             destination: this.destination,
             groundSpeed: this.groundSpeed,
+            organizationCollection,
             origin: this.fpOrigin,
             routeString: this.fpRoute,
             updateTime

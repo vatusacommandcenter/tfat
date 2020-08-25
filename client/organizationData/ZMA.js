@@ -87,6 +87,30 @@ export const ZMA = {
                         ]
                     }
                 ]
+                // 1: [
+                //     {
+                //         altitudes: [0, Infinity],
+                //         notes: 'fictional: houston',
+                //         coordinates: [
+                //             [29.10, -94.95],
+                //             [30.01, -94.68],
+                //             [30.36, -95.65],
+                //             [29.40, -95.84]
+                //         ]
+                //     }
+                // ],
+                // 2: [
+                //     {
+                //         altitudes: [0, Infinity],
+                //         notes: 'fictional: miami-ish',
+                //         coordinates: [
+                //             [27, -82],
+                //             [27, -79],
+                //             [25, -79],
+                //             [25, -82]
+                //         ]
+                //     }
+                // ]
             }
         }
     }

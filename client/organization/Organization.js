@@ -44,4 +44,17 @@ export default class Organization {
             this._nonCenterFacilities[facilityId] = facility;
         }
     }
+
+    /**
+     * Return an array of `Waypoint`s for each position where the provided
+     * Turf.js LineString intersects any polygon of any center sector
+     *
+     * @for Organization
+     * @method getCenterSectorBoundaryCrossingWaypoints
+     * @param {turf.lineString} turfLineString
+     * @returns {array<Waypoint>}
+     */
+    getCenterSectorBoundaryCrossingWaypoints(turfLineString) {
+        return this._centerFacility.getIntersectionsWithTurfLineString(turfLineString);
+    }
 }

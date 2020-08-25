@@ -10,9 +10,24 @@ export const DESTINATION_GROUP = {
     MYGF: ['MYGF', 'MYGW'],
     DAB: ['2J8', '7FL6', 'KDAB', 'KDED', 'KEVB', 'KFIN', 'KOMN', 'KXFL', 'X50'],
     MYNN: ['MYAF', 'MYEH', 'MYER', 'MYNN'],
-    MBPV: ['MBAC', 'MBGT', 'MBNC', 'MBPI', 'MBPV', 'MBSC', 'MBSY']
+    MBPV: ['MBAC', 'MBGT', 'MBNC', 'MBPI', 'MBPV', 'MBSC', 'MBSY'],
+    get ZMA() {
+        return [...this.MIA, ...this.TPA, ...this.PBI, ...this.RSW, ...this.NQX, ...this.F11, ...this.JAX, ...this.MYGF, ...this.DAB, ...this.MYNN, ...this.MBPV]
+    }
 };
 /* eslint-enable max-len */
+
+/**
+ * List of fixes which may appear in navigation data, which should have all fix-types by that name be ignored
+ */
+export const FIXES_TO_IGNORE = [
+    'AR17', // confuses ARxx airport with the Atlantic Routes
+    'AR21', // confuses ARxx airport with the Atlantic Routes
+    'AR22', // confuses ARxx airport with the Atlantic Routes
+    'AR24', // confuses ARxx airport with the Atlantic Routes
+    'DCT', // direct elements are stupid
+    'VFR' // VFR is not a fix
+];
 
 /**
  * Interval (milliseconds) upon which the client will repeatedly request new pilot

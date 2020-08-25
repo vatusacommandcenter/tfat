@@ -1,6 +1,7 @@
 import distance from '@turf/distance';
 import { convertLength } from '@turf/helpers';
 import { TURF_LENGTH_UNIT } from './constants/turfConstants.js';
+import bearing from '@turf/bearing';
 
 /**
  * Modulus function
@@ -73,4 +74,19 @@ export function distanceNm(point1, point2) {
     );
 
     return distanceNauticalMiles;
+}
+
+/**
+ * Helper function to call Turf.js's `bearing()` function and convert its [-180, 180] output to [0, 360]
+ *
+ * @function bearing360
+ * @param {turf.Point} point1
+ * @param {turf.Point} point2
+ * @returns {number} - bearing in decimal degrees between [0, 360]
+ */
+export function bearing360(point1, point2) {
+    const bearing180 = bearing(point1, point2);
+    const bearing360 = mod(bearing180, 360);
+
+    return bearing360;
 }

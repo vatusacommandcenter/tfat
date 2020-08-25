@@ -58,4 +58,17 @@ export default class Facility {
         this._facilityName = data.facilityName;
         this._sectorCollection = new SectorCollection(data.sectors);
     }
+
+    /**
+     * Return an array of `Waypoint`s for each position where the provided
+     * Turf.js LineString intersects any polygon of any sector of this facility
+     *
+     * @for Facility
+     * @method getIntersectionsWithTurfLineString
+     * @param {turf.lineString} turfLineString
+     * @returns {array<Waypoint>}
+     */
+    getIntersectionsWithTurfLineString(turfLineString) {
+        return this._sectorCollection.getIntersectionsWithTurfLineString(turfLineString);
+    }
 }

@@ -5,8 +5,9 @@ import ClockView from './views/ClockView.js';
 import TimeStampView from './views/TimeStampView.js';
 import OrganizationCollection from './organization/OrganizationCollection.js';
 
-const organizationCollection = new OrganizationCollection();
-const aircraftCollection = new AircraftCollection();
+const initialOrganizationId = 'ZMA';
+const organizationCollection = new OrganizationCollection(initialOrganizationId);
+const aircraftCollection = new AircraftCollection(organizationCollection);
 const aircraftTableView = new AircraftTableView(aircraftCollection);
 const timeStampView = new TimeStampView();
 const clockView = new ClockView();
@@ -16,7 +17,7 @@ function getAircraftToShow() {
     // return JSON.stringify(filterPilotsByDestination('KMIA'));
     // return JSON.stringify(filterPilotsByDestinationGroup('MIA'));
 
-    const mia = aircraftCollection.filterByDestinationGroup('MIA');
+    const mia = aircraftCollection.filterByDestinationGroup('ZMA');
     // const tpa = `TPA:   ${JSON.stringify(filterPilotsByDestinationGroup('TPA'))}`;
     // const pbi = `PBI:   ${JSON.stringify(filterPilotsByDestinationGroup('PBI'))}`;
     // const rsw = `RSW:   ${JSON.stringify(filterPilotsByDestinationGroup('RSW'))}`;

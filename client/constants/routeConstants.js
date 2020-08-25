@@ -126,3 +126,5 @@ export const SOURCE_DATA_WAYPOINT_TYPES = {
  * @type {number} - angle in degrees
  */
 export const MAX_TURN_ANGLE_BEFORE_SKIPPING_FIX_DEG = 100;
+
+export const MAX_ANGLE_DIFFERENCE_TO_CONSIDER_ROUTE_ALIGNED_DEG = 5;
