@@ -7,7 +7,7 @@ import NavigationLibrary from '../navData/NavigationLibrary.js';
 import Waypoint from './Waypoint.js';
 import { TURF_LENGTH_UNIT } from '../constants/turfConstants.js';
 import { calculateAngleDifference, distanceNm, bearing360 } from '../clientUtilities.js';
-import { MAX_TURN_ANGLE_BEFORE_SKIPPING_FIX_DEG, MAX_ANGLE_DIFFERENCE_TO_CONSIDER_ROUTE_ALIGNED_DEG } from '../constants/routeConstants.js';
+import { MAX_TURN_ANGLE_BEFORE_SKIPPING_FIX_DEG } from '../constants/routeConstants.js';
 import { TIME } from '../../globalConstants.js';
 import { FIXES_TO_IGNORE } from '../constants/clientConstants.js';
 
@@ -245,7 +245,7 @@ export default class Route {
      */
     _getFixesFromRouteString() {
         const routeElements = this._getElementsFromRouteString();
-        let waypoints = [];
+        const waypoints = [];
 
         for (const element of routeElements) {
             if (FIXES_TO_IGNORE.includes(element)) {
@@ -281,24 +281,31 @@ export default class Route {
     }
 
     _insertSectorBoundaryWaypoints(organizationCollection) {
-        // const turfLine = lineString([[-82, 27], [-79, 27], [-79, 25], [-82, 25]]);
-        // const turfPoly = lineToPolygon(turfLine);
-        // const turfIntersectingLine = lineString([[-80, 28], [-80, 26], [-80, 24]]);
-        // const intersections = lineIntersect(turfIntersectingLine, turfPoly);
-        // eslint-disable-next-line max-len
-        // // https://skyvector.com/?ll=26.12831611206515,-80.3831176695913&chart=301&zoom=7&fpl=2700N08200W%202700N07900W%202500N07900W%202500N08200W%202800N08000W%202600N08000W%202400N08000W
-        // iterate through detected positions
-        //     iterate through existing waypoints
-        //     find the place where this intersection point belongs
-        //         add new waypoint there and remove that position from the list of detected positions
-
         this._updateTurfLineStringFromWaypoints();
 
-        // iterate through every polygon to find intersection positions
-        const centerBoundaryWaypoints = organizationCollection.getCenterSectorBoundaryCrossingWaypoints(this._turfLineString);
-        // const uniqueCenterBoundaryWaypoints = this._filterWaypointsToUniquePositions(centerBoundaryWaypoints);
+        // iterate through fix/aircraft waypoints
+        for (let i = 0; i < this._waypoints.length - 1; i++) {
+            const waypoint = this._waypoints[i];
+            const nextWaypoint = this._waypoints[i + 1];
+            const turfLineString = lineString([waypoint.coordinatesLonLat, nextWaypoint.coordinatesLonLat]);
+            const centerBoundaryWaypoints = organizationCollection.getCenterSectorBoundaryCrossingWaypoints(turfLineString);
 
-        this._insertWaypoints(centerBoundaryWaypoints);
+            if (centerBoundaryWaypoints.length === 0) {
+                continue;
+            }
+
+            const sortedCenterBoundaryWaypoints = centerBoundaryWaypoints.sort((wpA, wpB) => {
+                const distanceToWpA = distance(waypoint.turfPoint, wpA.turfPoint);
+                const distanceToWpB = distance(waypoint.turfPoint, wpB.turfPoint);
+
+                return distanceToWpA - distanceToWpB;
+            });
+
+            this._waypoints.splice(i + 1, 0, ...sortedCenterBoundaryWaypoints);
+
+            i += sortedCenterBoundaryWaypoints.length;
+        }
+
         this._generateSectorEntryExitData();
     }
 

@@ -21,7 +21,6 @@ export default class Aircraft {
     }
 
     _init(updateTime, organizationCollection) {
-        if (this.callsign === 'SIL94') debugger;
         this._route = new Route({
             aircraftPosition: this.position,
             destination: this.destination,

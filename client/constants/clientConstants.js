@@ -26,7 +26,9 @@ export const FIXES_TO_IGNORE = [
     'AR22', // confuses ARxx airport with the Atlantic Routes
     'AR24', // confuses ARxx airport with the Atlantic Routes
     'DCT', // direct elements are stupid
-    'VFR' // VFR is not a fix
+    'VFR', // VFR is not a fix
+    'FF', // FF indicates flight following, assume they don't mean the FF NDB
+    'TO' // common in plain-english routes, assume they don't mean the TO NDB
 ];
 
 /**
