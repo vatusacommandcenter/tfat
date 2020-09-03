@@ -301,6 +301,17 @@ export default class Route {
                 return distanceToWpA - distanceToWpB;
             });
 
+            // combine back-to-back waypoints for exiting one sector and entering another at the same location
+            for (let j = 0; j < sortedCenterBoundaryWaypoints.length - 1; j++) {
+                const thisIndexWp = sortedCenterBoundaryWaypoints[j];
+                const nextIndexWp = sortedCenterBoundaryWaypoints[j + 1];
+
+                if (thisIndexWp.isCollocatedWithWaypoint(nextIndexWp)) { // if collocated, merge waypoint sector poly data
+                    thisIndexWp.sectorBoundaryPolygons.push(...nextIndexWp.sectorBoundaryPolygons);
+                    sortedCenterBoundaryWaypoints.splice(j + 1, 1);
+                }
+            }
+
             this._waypoints.splice(i + 1, 0, ...sortedCenterBoundaryWaypoints);
 
             i += sortedCenterBoundaryWaypoints.length;
