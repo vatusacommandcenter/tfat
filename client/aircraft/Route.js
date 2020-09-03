@@ -180,10 +180,22 @@ export default class Route {
      *
      * @for Route
      * @method _generateSectorEntryExitData
+     * @param organizationCollection {OrganizationCollection}
      * @returns undefined
      * @private
      */
-    _generateSectorEntryExitData() {
+    _generateSectorEntryExitData(organizationCollection) {
+        if (this._waypoints.length === 0) {
+            return;
+        }
+
+        const sectorsRouteStartsWithin = organizationCollection.getSectorsFromTurfPoint(this._waypoints[0].turfPoint);
+
+        // if first waypoint is inside a sector, mark that waypoint as "entering" that sector
+        if (sectorsRouteStartsWithin.length > 0) {
+            this._waypoints[0].sectorChange.enter.push(...sectorsRouteStartsWithin);
+        }
+
         // first wp will never be a sector-entry wp because they are interpolated
         for (let i = 1; i < this._waypoints.length; i++) {
             const waypoint = this._waypoints[i];
@@ -193,10 +205,15 @@ export default class Route {
             }
 
             const previousWaypointCoords = this._waypoints[i - 1].turfPoint.geometry.coordinates;
+            const currentWaypointCoords = this._waypoints[i].turfPoint.geometry.coordinates;
+            const legMidpointCoords = [
+                (previousWaypointCoords[0] + currentWaypointCoords[0]) / 2,
+                (previousWaypointCoords[1] + currentWaypointCoords[1]) / 2
+            ];
 
             for (let j = 0; j < waypoint.sectorBoundaryPolygons.length; j++) {
                 const poly = waypoint.sectorBoundaryPolygons[j];
-                const isExitingPoly = booleanPointInPolygon(previousWaypointCoords, poly);
+                const isExitingPoly = booleanPointInPolygon(legMidpointCoords, poly);
 
                 if (isExitingPoly) { // Waypoint marks the position the aircraft LEAVES the sector
                     waypoint.sectorChange.exit.push(poly.properties.sector);
@@ -283,7 +300,6 @@ export default class Route {
     _insertSectorBoundaryWaypoints(organizationCollection) {
         this._updateTurfLineStringFromWaypoints();
 
-        // iterate through fix/aircraft waypoints
         for (let i = 0; i < this._waypoints.length - 1; i++) {
             const waypoint = this._waypoints[i];
             const nextWaypoint = this._waypoints[i + 1];
@@ -317,7 +333,7 @@ export default class Route {
             i += sortedCenterBoundaryWaypoints.length;
         }
 
-        this._generateSectorEntryExitData();
+        this._generateSectorEntryExitData(organizationCollection);
     }
 
     /**

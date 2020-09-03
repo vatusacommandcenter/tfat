@@ -8,7 +8,7 @@ export const ZMA = {
                 23: [
                     {
                         altitudes: [0, Infinity],
-                        notes: '',
+                        notes: 'sector 23',
                         coordinates: [
                             [27.15000000, -80.06666667],
                             [27.15000000, -80.22166667],

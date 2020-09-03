@@ -19,6 +19,18 @@ export default class SectorCollection {
     }
 
     /**
+     * Return an array of `Sector`s who own the airspace the provided Turf.js Point is within
+     *
+     * @for SectorCollection
+     * @method getSectorsFromTurfPoint
+     * @param {turf.Point} turfPoint
+     * @returns {array<Sector>}
+     */
+    getSectorsFromTurfPoint(turfPoint) {
+        return this._sectors.filter((sector) => sector.isTurfPointInAirspace(turfPoint));
+    }
+
+    /**
      * Return a `Sector` instance within the collection who has the spcified sector id
      *
      * @for SectorCollection

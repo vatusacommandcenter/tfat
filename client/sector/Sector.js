@@ -1,6 +1,7 @@
 import { lineString } from '@turf/helpers';
 import lineToPolygon from '@turf/line-to-polygon';
 import lineIntersect from '@turf/line-intersect';
+import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
 
 export default class Sector {
     constructor(id, data) {
@@ -68,6 +69,19 @@ export default class Sector {
         }
 
         return intersections;
+    }
+
+    /**
+     * Return whether or not the specified Turf.js Point is located within any
+     * of this sector's airspace polygons
+     *
+     * @for Sector
+     * @method isTurfPointInAirspace
+     * @param {turf.Point} turfPoint
+     * @returns {boolean}
+     */
+    isTurfPointInAirspace(turfPoint) {
+        return this._polygons.some((poly) => booleanPointInPolygon(turfPoint.geometry.coordinates, poly));
     }
 }
 

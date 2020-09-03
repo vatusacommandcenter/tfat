@@ -57,4 +57,16 @@ export default class Organization {
     getCenterSectorBoundaryCrossingWaypoints(turfLineString) {
         return this._centerFacility.getIntersectionsWithTurfLineString(turfLineString);
     }
+
+    /**
+     * Return an array of `Sector`s who own the airspace the provided Turf.js Point is within
+     *
+     * @for Organization
+     * @method getSectorsFromTurfPoint
+     * @param {turf.Point} turfPoint
+     * @returns {array<Sector>}
+     */
+    getSectorsFromTurfPoint(turfPoint) {
+        return this._centerFacility.getSectorsFromTurfPoint(turfPoint);
+    }
 }

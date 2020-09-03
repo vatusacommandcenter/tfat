@@ -71,4 +71,16 @@ export default class Facility {
     getIntersectionsWithTurfLineString(turfLineString) {
         return this._sectorCollection.getIntersectionsWithTurfLineString(turfLineString);
     }
+
+    /**
+     * Return an array of `Sector`s who own the airspace the provided Turf.js Point is within
+     *
+     * @for Facility
+     * @method getSectorsFromTurfPoint
+     * @param {turf.Point} turfPoint
+     * @returns {array<Sector>}
+     */
+    getSectorsFromTurfPoint(turfPoint) {
+        return this._sectorCollection.getSectorsFromTurfPoint(turfPoint);
+    }
 }
