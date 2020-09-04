@@ -1,3 +1,4 @@
+import _flatten from 'lodash/flatten.js';
 import _last from 'lodash/last.js';
 import bearing from '@turf/bearing';
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
@@ -143,7 +144,8 @@ export default class Route {
             const originSideWaypoint = this._waypoints[i];
             const destSideWaypoint = this._waypoints[i + 1];
             const distance = distanceNm(destSideWaypoint.turfPoint, originSideWaypoint.turfPoint);
-            const travelTimeMs = distance / this._groundSpeedOfAircraft * TIME.ONE_HOUR_IN_MILLISECONDS;
+            const groundSpeed = this._groundSpeedOfAircraft > 0 ? this._groundSpeedOfAircraft : 0.001;
+            const travelTimeMs = distance / groundSpeed * TIME.ONE_HOUR_IN_MILLISECONDS;
             const timeAtOriginSideWaypoint = new Date(destSideWaypoint.time.getTime() - travelTimeMs);
             originSideWaypoint.time = timeAtOriginSideWaypoint;
         }
@@ -153,10 +155,22 @@ export default class Route {
             const originSideWaypoint = this._waypoints[i - 1];
             const destSideWaypoint = this._waypoints[i];
             const distance = distanceNm(originSideWaypoint.turfPoint, destSideWaypoint.turfPoint);
-            const travelTimeMs = distance / this._groundSpeedOfAircraft * TIME.ONE_HOUR_IN_MILLISECONDS;
+            const groundSpeed = this._groundSpeedOfAircraft > 0 ? this._groundSpeedOfAircraft : 0.001;
+            const travelTimeMs = distance / groundSpeed * TIME.ONE_HOUR_IN_MILLISECONDS;
             const timeAtDestSideWaypoint = new Date(originSideWaypoint.time.getTime() + travelTimeMs);
             destSideWaypoint.time = timeAtDestSideWaypoint;
         }
+    }
+
+    /**
+     * Return an array of all `Waypoint`s in this `Route` which mark an entry or exit of a `Sector`
+     *
+     * @for Route
+     * @method getWaypointsWithSectorChanges
+     * @returns {array<Waypoint>}
+     */
+    getWaypointsWithSectorChanges() {
+        return this._waypoints.filter((wp) => wp.sectorChange.enter.length > 0 || wp.sectorChange.exit.length > 0);
     }
 
     // _filterWaypointsToUniquePositions(waypoints) {

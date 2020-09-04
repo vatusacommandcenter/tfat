@@ -83,4 +83,16 @@ export default class Facility {
     getSectorsFromTurfPoint(turfPoint) {
         return this._sectorCollection.getSectorsFromTurfPoint(turfPoint);
     }
+
+    /**
+     * Update the timetables for all `Sector`s
+     *
+     * @for Facility
+     * @method updateSectorTimeTables
+     * @param aircraftCollection {AircraftCollection}
+     * @returns undefined
+     */
+    updateSectorTimeTables(aircraftCollection) {
+        this._sectorCollection.updateSectorTimeTables(aircraftCollection);
+    }
 }

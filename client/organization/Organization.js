@@ -4,6 +4,9 @@ export default class Organization {
     constructor(id, data) {
         this._identifier = id;
         this._organizationName = data.organizationName;
+
+        // TODO: Change this to replace _centerFacility with simply:
+        // this._facilities = { this._identifier: new Facility() , F11: new Facility(), ...}
         this._centerFacility = null;
         this._nonCenterFacilities = {};
 
@@ -68,5 +71,17 @@ export default class Organization {
      */
     getSectorsFromTurfPoint(turfPoint) {
         return this._centerFacility.getSectorsFromTurfPoint(turfPoint);
+    }
+
+    /**
+     * Update the timetables for all `Sector`s
+     *
+     * @for Organization
+     * @method updateSectorTimeTables
+     * @param aircraftCollection {AircraftCollection}
+     * @returns undefined
+     */
+    updateSectorTimeTables(aircraftCollection) {
+        this._centerFacility.updateSectorTimeTables(aircraftCollection);
     }
 }

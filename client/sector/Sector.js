@@ -7,6 +7,7 @@ export default class Sector {
     constructor(id, data) {
         this._polygons = [];
         this._id = id;
+        this.timeTable = {};
 
         this._init(data);
     }

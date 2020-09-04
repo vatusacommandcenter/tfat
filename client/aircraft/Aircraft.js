@@ -11,17 +11,17 @@ export default class Aircraft {
             this[key] = aircraftData[key];
         }
 
-        this._route = null;
+        this.route = null;
 
         this._init(updateTime, organizationCollection);
     }
 
     get eta() {
-        return this._route.eta;
+        return this.route.eta;
     }
 
     _init(updateTime, organizationCollection) {
-        this._route = new Route({
+        this.route = new Route({
             aircraftPosition: this.position,
             destination: this.destination,
             groundSpeed: this.groundSpeed,
@@ -73,8 +73,8 @@ export default class Aircraft {
         // https://skyvector.com/?ll=30,-80&chart=302&zoom=14&fpl=%20KMIA%20HEDLY2%20HEDLY%20PHK%20ORL%20LAIRI%20LARZZ%20KATL
         const currentLatLon = `${this.latitude},${this.longitude}`;
         const url = `https://skyvector.com/?ll=${currentLatLon}&chart=304&zoom=10&fpl=%20` +
-            `${this._route._waypoints.map((wp) => wp.icao).join('%20')}`;
-        const text = `${this._route.getFullRouteLength()} nm | ETA: ${this.eta.toUTCString()}`;
+            `${this.route._waypoints.map((wp) => wp.icao).join('%20')}`;
+        const text = `${this.route.getFullRouteLength()} nm | ETA: ${this.eta.toUTCString()}`;
         const ahref = `<a href="${url}" target="_blank">${text}</a>`;
 
         const html = `<tr><td>${this.callsign}</td><td>${this.fpAircraft}</td><td>${this.fpOrigin}</td>` +

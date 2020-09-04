@@ -161,6 +161,27 @@ export default class AircraftCollection {
     }
 
     /**
+     * Return an array of objects which each include a `Waypoint` an `Aircraft`
+     * passes on its `Route` where they enter or exit a `Sector`
+     *
+     * @for AircraftCollection
+     * @method getSectorChanges
+     * @returns {array<object>} - [ {aircraft, waypoint}, {aircraft, waypoint}, ...]
+     */
+    getSectorChanges() {
+        const sectorChanges = [];
+
+        for (const aircraft of this._list) {
+            const waypoints = aircraft.route.getWaypointsWithSectorChanges();
+            const sectorChangeList = waypoints.map((waypoint) => { return { aircraft, waypoint }; });
+
+            sectorChanges.push(...sectorChangeList);
+        }
+
+        return sectorChanges;
+    }
+
+    /**
      * Return html table body data for the entry for all `Aircraft` in `this` collection
      *
      * @for AircraftCollection

@@ -1,4 +1,6 @@
 import _flatten from 'lodash/flatten.js';
+import _last from 'lodash/last.js';
+import _without from 'lodash/without.js';
 import Sector from './Sector.js';
 import Waypoint from '../aircraft/Waypoint.js';
 
@@ -76,6 +78,64 @@ export default class SectorCollection {
         });
 
         return waypoints;
+    }
+
+    /**
+     * Update the timetables for all `Sector`s
+     *
+     * @for SectorCollection
+     * @method updateSectorTimeTables
+     * @param aircraftCollection {AircraftCollection}
+     * @returns undefined
+     */
+    updateSectorTimeTables(aircraftCollection) {
+        const sectorChanges = aircraftCollection.getSectorChanges(); // [ { aircraft, waypoint } ]
+        const sortedSectorChanges = sectorChanges.sort((a, b) => a.waypoint.time - b.waypoint.time);
+
+        for (const { aircraft, waypoint } of sortedSectorChanges) {
+            const { enter, exit } = waypoint.sectorChange;
+            const timeInteger = waypoint.time.getTime();
+
+            // ignore non-airborne aircraft by assuming slow a/c are on the
+            if (aircraft.groundSpeed < 51) {
+                continue;
+            }
+
+            // check for exits first, so any overwrites favor KEEPING the a/c in the count
+            if (exit.length > 0) { // if exiting sector(s)
+                for (const sector of exit) { // for each sector being exited
+                    if (enter.includes(sector)) { // if exiting one shelf and entering another of the same sector
+                        continue;
+                    }
+
+                    const previousTime = _last(Object.keys(sector.timeTable));
+                    const previousAircraftList = sector.timeTable[previousTime];
+                    const nextAircraftList = _without(previousAircraftList, aircraft);
+                    sector.timeTable[timeInteger] = nextAircraftList;
+                }
+            }
+
+            if (enter.length > 0) { // if entering new sector(s)
+                for (const sector of enter) { // for each sector being entered
+                    if (exit.includes(sector)) { // if exiting one shelf and entering another of the same sector
+                        continue;
+                    }
+
+                    let previousAircraftList = [];
+                    const previousTime = _last(Object.keys(sector.timeTable));
+
+                    if (typeof previousTime !== 'undefined') {
+                        previousAircraftList = sector.timeTable[previousTime];
+                    }
+
+                    // this will also work when two aircraft enter the sector at the exact same time.
+                    // since we're processing them in chronological order, we'll just overwrite the same
+                    // time table entry, adding all of the aircraft through each iteration
+                    const nextAircraftList = [...previousAircraftList, aircraft];
+                    sector.timeTable[timeInteger] = nextAircraftList;
+                }
+            }
+        }
     }
 }
 

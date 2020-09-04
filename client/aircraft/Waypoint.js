@@ -33,7 +33,7 @@ export default class Waypoint {
          * Data representing which sector we are entering/exiting upon passing over this waypoint
          *
          * @for Waypoint
-         * @property _sectorChange
+         * @property sectorChange
          * @type {object}
          */
         this.sectorChange = { enter: [], exit: [] };

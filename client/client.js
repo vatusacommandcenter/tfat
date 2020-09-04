@@ -58,6 +58,7 @@ function processNewVatsimData(httpResponse) {
     }
 
     aircraftCollection.updateCollection(httpResponse);
+    organizationCollection.activeOrganization.updateSectorTimeTables(aircraftCollection);
     renderVatsimData();
 }
 
