@@ -25,8 +25,8 @@ export default class SectorVolumePageView {
 
     _init(data) {
         this._organization = data;
-        this._intervals = this._generateIntervals();
 
+        this._regenerateIntervals();
         this._initCenterTimeTable();
         this._initAirportGroupsTimeTable();
         this._initKeyAirportsTimeTable();
@@ -66,8 +66,41 @@ export default class SectorVolumePageView {
         this.$element.classList.add('d-none');
     }
 
+    /**
+     * Returns whether or not we should move the tables to the next interval because time
+     * has passed such that the current time is no longer within the displayed first interval
+     *
+     * @for SectorVolumePageView
+     * @method incrementCurrentInterval
+     * @returns {boolean}
+     */
+    incrementCurrentInterval() {
+        if (this._intervals.length === 0) { // while waiting for data, the intervals will be empty
+            return;
+        }
+
+        const currentTime = new Date().getTime();
+        const currentIntervalEndTime = this._intervals[0][1];
+
+        if (currentTime > currentIntervalEndTime) {
+            this._regenerateIntervals();
+            this.updateAllTables();
+        }
+    }
+
     show() {
         this.$element.classList.remove('d-none');
+    }
+
+    updateAllTables() {
+        this.updateCenterSectorsTable();
+        this.updateAirportGroupsTable();
+        this.updateKeyAirportsTable();
+    }
+
+    updateAirportGroupsTable() {
+        // this._updateAirportGroupsTimeTable();
+        this._updateAirportGroupsTableElementFromAirportGroupsTimeTable();
     }
 
     updateCenterSectorsTable() {
@@ -81,13 +114,16 @@ export default class SectorVolumePageView {
     }
 
     /**
-     * Return a nested array of JS.Date time integers, aligned to the next n:00:00 hour, separated by `_tableIntervalMinutes`
+     * Create a nested array of JS.Date time integers, aligned to the next n:00:00 hour, separated
+     * by `_tableIntervalMinutes`, and store it in `this._intervals`
+     *
+     * [ [start, end], [start, end], ... ]
      *
      * @for SectorVolumePageView
-     * @method _generateIntervals
-     * @returns {array<array<number>>} [ [start, end], [start, end], ... ]
+     * @method _regenerateIntervals
+     * @returns undefined
      */
-    _generateIntervals() {
+    _regenerateIntervals() {
         let nextHour = new Date();
 
         nextHour.setHours(nextHour.getHours() + 1, 0, 0, 0);
@@ -107,7 +143,7 @@ export default class SectorVolumePageView {
             intervalStartTimes.push([intervalStart, intervalEnd]);
         }
 
-        return intervalStartTimes;
+        this._intervals = intervalStartTimes;
     }
 
     _getIntervalRowHtml() {

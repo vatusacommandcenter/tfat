@@ -19,7 +19,7 @@ export default class TimeStampView {
     enable() {
         this.updateTimeStampAge();
 
-        this._timeout = setInterval(() => this.updateTimeStampAge(), CLOCK_UPDATE_INTERVAL);
+        this._timeout = setInterval(this.updateTimeStampAge.bind(this), CLOCK_UPDATE_INTERVAL);
     }
 
     disable() {

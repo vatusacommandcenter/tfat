@@ -1,6 +1,7 @@
 import _without from 'lodash/without.js';
 import AircraftTablePageView from './pages/AircraftTablePageView.js';
 import SectorVolumePageView from './pages/SectorVolumePageView.js';
+import { CLOCK_UPDATE_INTERVAL } from '../constants/clientConstants.js';
 
 export default class ViewController {
     constructor(aircraftCollection, activeOrganization) {
@@ -12,6 +13,7 @@ export default class ViewController {
         this._activeView = null;
         this._aircraftTablePageView = null;
         this._sectorVolumePageView = null;
+        this._timeout = null;
 
         this._init(aircraftCollection, activeOrganization);
     }
@@ -36,6 +38,9 @@ export default class ViewController {
         this.$navLinkFlow.addEventListener('click', this.showSectorVolumePageView.bind(this));
         // this.$navLinkReleases.addEventListener('click', null);
         // this.$navLinkSettings.addEventListener('click', null);
+
+        this._timeoutHandler = this._sectorVolumePageView.incrementCurrentInterval.bind(this._sectorVolumePageView);
+        this._timeout = setInterval(this._timeoutHandler.bind(this), CLOCK_UPDATE_INTERVAL);
     }
 
     disable() {
@@ -43,6 +48,8 @@ export default class ViewController {
         this.$navLinkFlow.removeEventListener('click', this.showSectorVolumePageView.bind(this));
         // this.$navLinkReleases.removeEventListener('click', null);
         // this.$navLinkSettings.removeEventListener('click', null);
+
+        this._timeout.clearTimeout();
     }
 
     showAircraftTablePageView() {
@@ -74,8 +81,7 @@ export default class ViewController {
     }
 
     updateSectorVolumePageTables() {
-        this._sectorVolumePageView.updateCenterSectorsTable();
-        this._sectorVolumePageView.updateKeyAirportsTable();
+        this._sectorVolumePageView.updateAllTables();
     }
 
     _showIdAsActiveInNavbar(elementId) {
