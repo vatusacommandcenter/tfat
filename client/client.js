@@ -1,14 +1,14 @@
 import { DATA_UPDATE_INTERVAL } from './constants/clientConstants.js';
 import AircraftCollection from './aircraft/AircraftCollection.js';
-import AircraftTableView from './views/AircraftTableView.js';
 import ClockView from './views/ClockView.js';
 import TimeStampView from './views/TimeStampView.js';
 import OrganizationCollection from './organization/OrganizationCollection.js';
+import ViewController from './views/ViewController.js';
 
 const initialOrganizationId = 'ZMA';
 const organizationCollection = new OrganizationCollection(initialOrganizationId);
 const aircraftCollection = new AircraftCollection(organizationCollection);
-const aircraftTableView = new AircraftTableView(aircraftCollection);
+const viewController = new ViewController(aircraftCollection, organizationCollection.activeOrganization);
 const timeStampView = new TimeStampView();
 const clockView = new ClockView();
 
@@ -40,9 +40,12 @@ function getAircraftToShow() {
 
 function renderVatsimData() {
     const filteredAircraftCollection = getAircraftToShow();
-    aircraftTableView.showAircraft(filteredAircraftCollection);
+
+    viewController.updateAircraftTable(filteredAircraftCollection);
     timeStampView.updateTimeStampFromVatsimDate(filteredAircraftCollection.updateTime);
-    // aircraftTableView.showAllAircraft();
+    viewController.updateSectorTables();
+    // aircraftTablePageView.showAllAircraft();
+    // sectorVolumePageView._init(aircraftCollection);
 
     console.log(`----------------------------------New data rendered at ${new Date()}`);
 }
@@ -80,7 +83,7 @@ function getUpdatedData() {
     xmlHttp.send();
 }
 
-// setInterval(updateClock, clockUpdateInterval);
+// MAIN
 getUpdatedData();
 setInterval(getUpdatedData, DATA_UPDATE_INTERVAL);
 clockView.enable();

@@ -1,6 +1,7 @@
-export default class AircraftTableView {
+export default class AircraftTablePageView {
     constructor(aircraftCollection) {
-        this.$aircraftTableElement = null;
+        this.$element = document.getElementById('aircraft-table-page-content');
+        this.$aircraftTableElement = document.getElementById('atp-aircraft-table');
 
         /**
          * Local reference to the `AircraftCollection`
@@ -20,7 +21,7 @@ export default class AircraftTableView {
          * @type {number}
          * @private
          */
-        this._columnLabels = ['callsign', 'type', 'origin', 'dest', 'altitude', 'route length'];
+        this._columnLabels = ['callsign', 'type', 'origin', 'dest', 'altitude', 'route dist | ETA'];
 
         this._tableHead = '';
 
@@ -28,9 +29,8 @@ export default class AircraftTableView {
     }
 
     _init() {
-        this.$aircraftTableElement = document.getElementById('aircraft-table');
-
         this._initTableHead();
+        this.addAllAircraftToTable();
     }
 
     _initTableHead() {
@@ -41,27 +41,34 @@ export default class AircraftTableView {
         this._tableHead = tableHead;
     }
 
-    showAllAircraft() {
-        const tableHead = this._tableHead;
+    addAllAircraftToTable() {
         const tableBody = `<tbody>${this._aircraftCollection.getTableBodyHTML()}</tbody>`;
-        const nextTableContent = tableHead + tableBody;
+        const nextTableHtml = this._tableHead + tableBody;
 
-        this.$aircraftTableElement.innerHTML = nextTableContent;
+        this.$aircraftTableElement.innerHTML = nextTableHtml;
     }
 
     /**
      * Update the table to show all aircraft in the provided `AircraftCollection`
      *
      * @for AircraftTableView
+     * @method addSpecificAircraftToTable
      * @param {AircraftCollection} aircraftCollection - instance of `AircraftCollection`
      *      which contains the lsit of all aircraft to show in the table
      * @returns {undefined}
      */
-    showAircraft(aircraftCollection) {
-        const tableHead = this._tableHead;
+    addSpecificAircraftToTable(aircraftCollection) {
         const tableBody = `<tbody>${aircraftCollection.getTableBodyHTML()}</tbody>`;
-        const nextTableContent = tableHead + tableBody;
+        const nextTableHtml = this._tableHead + tableBody;
 
-        this.$aircraftTableElement.innerHTML = nextTableContent;
+        this.$aircraftTableElement.innerHTML = nextTableHtml;
+    }
+
+    hide() {
+        this.$element.classList.add('d-none');
+    }
+
+    show() {
+        this.$element.classList.remove('d-none');
     }
 }

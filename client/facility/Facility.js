@@ -84,6 +84,10 @@ export default class Facility {
         return this._sectorCollection.getSectorsFromTurfPoint(turfPoint);
     }
 
+    getAllSectors() {
+        return this._sectorCollection.sectors;
+    }
+
     /**
      * Update the timetables for all `Sector`s
      *

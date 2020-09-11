@@ -21,25 +21,25 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <ul class="navbar-nav mr-auto">
-                    <li class="nav-item active">
-                        <a class="nav-link" href="#">Aircaft<span class="sr-only">(current)</span></a>
+                    <li class="nav-item">
+                        <a class="nav-link active" id="nav-link-aircraft" href="#">Aircaft<span class="sr-only">(current)</span></a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link disabled" href="#">Flow<span class="sr-only">(current)</span></a>
+                        <a class="nav-link" id="nav-link-flow" href="#">Flow<span class="sr-only">(current)</span></a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link disabled" href="#">Releases</a>
+                        <a class="nav-link disabled" id="nav-link-releases" href="#">Releases</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Facility</a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item active" href="#">ZMA ARTCC</a>
+                            <a class="dropdown-item active" id="nav-link-facility-ZMA" href="#">ZMA ARTCC</a>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item disabled" href="#">Request new facility (coming soon!)</a>
+                            <a class="dropdown-item disabled" id="nav-link-facility-request-new" href="#">Request new facility (coming soon!)</a>
                         </div>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link disabled" href="#">Settings</a>
+                        <a class="nav-link disabled" id="nav-link-settings" href="#">Settings</a>
                     </li>
                 </ul>
                 <span class="navbar-text" id="clock">Time Loading...</span>
@@ -53,10 +53,44 @@
 
     <!-- Begin page content -->
     <main role="main" class="flex-shrink-0">
-        <div class="container">
-            <h2 class="text-center">Online Aircraft:</h2>
-            <div id="aircraft-list"></div>
-            <table class="table table-striped table-hover table-sm" id="aircraft-table"><tr><td>Data Loading...</td></tr></table>
+        <div class="container" id="main-content">
+
+            <div class="col" id="aircraft-table-page-content">
+                <h2 class="text-center">Online Aircraft:</h2>
+                <table class="table table-striped table-hover table-sm" id="atp-aircraft-table">
+                    <tbody><tr><td>Data Loading...</td></tr></tbody>
+                </table>
+            </div>
+
+            <div class="row d-none" id="sector-volume-page-content">
+                <div class="col">
+                    <div>Center Sectors
+                        <table class="table table-responsive table-hover table-sm" id="svp-center-sectors">
+                            <tbody><tr><td>Data Loading...</td></tr></tbody>
+                        </table>
+                    </div>
+                    <div>Airport Groups
+                        <table class="table table-responsive table-hover table-sm" id="svp-airport-groups">
+                            <tbody><tr><td>Data Loading...</td></tr></tbody>
+                        </table>
+                    </div>
+                    <div>Airports
+                        <table class="table table-responsive table-hover table-sm" id="svp-airports">
+                            <tbody><tr><td>Data Loading...</td></tr></tbody>
+                        </table>
+                    </div>
+                    <div>Notes<br><textarea class="form-control"></textarea></div>
+                </div>
+                <div class="col">
+                    <div class="row">
+                        <div class="col">TMI Receiving<br><textarea class="form-control"></textarea></div>
+                        <div class="col">TMI Providing<br><textarea class="form-control"></textarea></div>
+                    </div>
+                    <div class="row">Situation Display</div>
+                    <div class="row">Bad Route Detection</div>
+                </div>
+            </div>
+
         </div>
     </main>
 

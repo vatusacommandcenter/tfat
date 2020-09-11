@@ -5,10 +5,10 @@ export default class Organization {
         this._identifier = id;
         this._organizationName = data.organizationName;
 
-        // TODO: Change this to replace _centerFacility with simply:
+        // TODO: Change this to replace centerFacility with simply:
         // this._facilities = { this._identifier: new Facility() , F11: new Facility(), ...}
-        this._centerFacility = null;
-        this._nonCenterFacilities = {};
+        this.centerFacility = null;
+        this.nonCenterFacilities = {};
 
         this._init(data);
     }
@@ -28,7 +28,7 @@ export default class Organization {
             throw new TypeError(`Expected a 'center' property in ${this.id}'s organization data, but none exists!`);
         }
 
-        this._centerFacility = new Facility(this._identifier, data.center);
+        this.centerFacility = new Facility(this._identifier, data.center);
     }
 
     _initNonCenterFacilities(data) {
@@ -44,7 +44,7 @@ export default class Organization {
             const facilityData = data[facilityId];
             const facility = new Facility(facilityId, facilityData);
 
-            this._nonCenterFacilities[facilityId] = facility;
+            this.nonCenterFacilities[facilityId] = facility;
         }
     }
 
@@ -58,7 +58,7 @@ export default class Organization {
      * @returns {array<Waypoint>}
      */
     getCenterSectorBoundaryCrossingWaypoints(turfLineString) {
-        return this._centerFacility.getIntersectionsWithTurfLineString(turfLineString);
+        return this.centerFacility.getIntersectionsWithTurfLineString(turfLineString);
     }
 
     /**
@@ -70,7 +70,7 @@ export default class Organization {
      * @returns {array<Sector>}
      */
     getSectorsFromTurfPoint(turfPoint) {
-        return this._centerFacility.getSectorsFromTurfPoint(turfPoint);
+        return this.centerFacility.getSectorsFromTurfPoint(turfPoint);
     }
 
     /**
@@ -82,6 +82,6 @@ export default class Organization {
      * @returns undefined
      */
     updateSectorTimeTables(aircraftCollection) {
-        this._centerFacility.updateSectorTimeTables(aircraftCollection);
+        this.centerFacility.updateSectorTimeTables(aircraftCollection);
     }
 }

@@ -20,6 +20,10 @@ export default class SectorCollection {
         }
     }
 
+    get sectors() {
+        return this._sectors;
+    }
+
     /**
      * Return an array of `Sector`s who own the airspace the provided Turf.js Point is within
      *

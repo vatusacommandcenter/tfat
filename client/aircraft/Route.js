@@ -1,4 +1,3 @@
-import _flatten from 'lodash/flatten.js';
 import _last from 'lodash/last.js';
 import bearing from '@turf/bearing';
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
