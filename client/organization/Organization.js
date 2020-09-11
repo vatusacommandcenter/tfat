@@ -5,6 +5,9 @@ export default class Organization {
         this._identifier = id;
         this._organizationName = data.organizationName;
 
+        this._keyAirportIcaos = [];
+        this.keyAirportArrivals = [];
+        this.airportGroupIcaos = {};
         // TODO: Change this to replace centerFacility with simply:
         // this._facilities = { this._identifier: new Facility() , F11: new Facility(), ...}
         this.centerFacility = null;
@@ -14,6 +17,20 @@ export default class Organization {
     }
 
     _init(data) {
+        if (!('keyAirports' in data)) {
+            throw new TypeError(`Expected organization ${this._identifier} to have a "keyAirports" ` +
+                'property containing a list of airport ICAO identifiers, but no such property exists!');
+        }
+
+        this._keyAirportIcaos = data.keyAirports;
+
+        if (!('airportGroups' in data)) {
+            throw new TypeError(`Expected organization ${this._identifier} to have a "airportGroups" ` +
+                'property containing airport group data, but no such property exists!');
+        }
+
+        this.airportGroupIcaos = data.airportGroups;
+
         if (!('facilities' in data)) {
             throw new TypeError(`Expected organization ${this._identifier} to have a "facilities" ` +
                 'property containing facility data, but no such property exists!');
@@ -83,5 +100,30 @@ export default class Organization {
      */
     updateSectorTimeTables(aircraftCollection) {
         this.centerFacility.updateSectorTimeTables(aircraftCollection);
+    }
+
+    /**
+     * Update the list of `Aircraft` who will arrive at each key airport, sorted by ETA
+     *
+     * @for Organization
+     * @method updateKeyAirportArrivals
+     * @param {AircraftCollection} aircraftCollection
+     * @returns undefined
+     */
+    updateKeyAirportArrivals(aircraftCollection) {
+        const airportArrivals = {};
+
+        for (const destinationIcao of this._keyAirportIcaos) {
+            const arrivalAircraftCollection = aircraftCollection.filterByDestination(destinationIcao);
+            const sortedAircraftCollection = arrivalAircraftCollection.sortByEta();
+
+            if (destinationIcao in airportArrivals) {
+                throw new TypeError(`The same airport (${destinationIcao}) is listed multiple times as a key airport!`);
+            }
+
+            airportArrivals[destinationIcao] = sortedAircraftCollection;
+        }
+
+        this.keyAirportArrivals = airportArrivals;
     }
 }

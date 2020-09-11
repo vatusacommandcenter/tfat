@@ -12,7 +12,7 @@ export const DESTINATION_GROUP = {
     MYNN: ['MYAF', 'MYEH', 'MYER', 'MYNN'],
     MBPV: ['MBAC', 'MBGT', 'MBNC', 'MBPI', 'MBPV', 'MBSC', 'MBSY'],
     get ZMA() {
-        return [...this.MIA, ...this.TPA, ...this.PBI, ...this.RSW, ...this.NQX, ...this.F11, ...this.JAX, ...this.MYGF, ...this.DAB, ...this.MYNN, ...this.MBPV]
+        return [...this.MIA, ...this.TPA, ...this.PBI, ...this.RSW, ...this.NQX, ...this.F11, ...this.JAX, ...this.MYGF, ...this.DAB, ...this.MYNN, ...this.MBPV];
     }
 };
 /* eslint-enable max-len */

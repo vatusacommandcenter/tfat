@@ -26,21 +26,23 @@ export default class ViewController {
         this._sectorVolumePageView = new SectorVolumePageView(activeOrganization);
         this._activeView = this._aircraftTablePageView;
 
+        this.showSectorVolumePageView();
+
         this.enable();
     }
 
     enable() {
-        this.$navLinkAircraft.onclick = this.showAircraftTablePageView.bind(this);
-        this.$navLinkFlow.onclick = this.showSectorVolumePageView.bind(this);
-        // this.$navLinkReleases.onclick = null;
-        // this.$navLinkSettings.onclick = null;
+        this.$navLinkAircraft.addEventListener('click', this.showAircraftTablePageView.bind(this));
+        this.$navLinkFlow.addEventListener('click', this.showSectorVolumePageView.bind(this));
+        // this.$navLinkReleases.addEventListener('click', null);
+        // this.$navLinkSettings.addEventListener('click', null);
     }
 
     disable() {
-        this.$navLinkAircraft.onclick = null;
-        this.$navLinkFlow.onclick = null;
-        this.$navLinkReleases.onclick = null;
-        this.$navLinkSettings.onclick = null;
+        this.$navLinkAircraft.removeEventListener('click', this.showAircraftTablePageView.bind(this));
+        this.$navLinkFlow.removeEventListener('click', this.showSectorVolumePageView.bind(this));
+        // this.$navLinkReleases.removeEventListener('click', null);
+        // this.$navLinkSettings.removeEventListener('click', null);
     }
 
     showAircraftTablePageView() {
@@ -71,8 +73,9 @@ export default class ViewController {
         this._aircraftTablePageView.addSpecificAircraftToTable(filteredAircraftCollection);
     }
 
-    updateSectorTables() {
+    updateSectorVolumePageTables() {
         this._sectorVolumePageView.updateCenterSectorsTable();
+        this._sectorVolumePageView.updateKeyAirportsTable();
     }
 
     _showIdAsActiveInNavbar(elementId) {

@@ -43,7 +43,7 @@ function renderVatsimData() {
 
     viewController.updateAircraftTable(filteredAircraftCollection);
     timeStampView.updateTimeStampFromVatsimDate(filteredAircraftCollection.updateTime);
-    viewController.updateSectorTables();
+    viewController.updateSectorVolumePageTables();
     // aircraftTablePageView.showAllAircraft();
     // sectorVolumePageView._init(aircraftCollection);
 
@@ -62,6 +62,7 @@ function processNewVatsimData(httpResponse) {
 
     aircraftCollection.updateCollection(httpResponse);
     organizationCollection.activeOrganization.updateSectorTimeTables(aircraftCollection);
+    organizationCollection.activeOrganization.updateKeyAirportArrivals(aircraftCollection);
     renderVatsimData();
 }
 

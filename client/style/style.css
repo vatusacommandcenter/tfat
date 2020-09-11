@@ -1,0 +1,17 @@
+#svp-center-sectors td {
+    padding: .1rem .3rem;
+    text-align: center;
+    border: 1px solid #dee2e6;
+}
+
+#svp-airport-groups td {
+    padding: .1rem .3rem;
+    text-align: center;
+    border: 1px solid #dee2e6;
+}
+
+#svp-key-airports td {
+    padding: .1rem .3rem;
+    text-align: center;
+    border: 1px solid #dee2e6;
+}

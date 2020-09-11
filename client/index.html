@@ -7,6 +7,7 @@
     <meta name="description" content="">
     <title>Traffic Flow Analysis Tool</title>
     <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <link rel="stylesheet" href="style/style.css">
     <link rel="stylesheet" href="style/sticky-footer-navbar.css">
 </head>
 
@@ -64,18 +65,21 @@
 
             <div class="row d-none" id="sector-volume-page-content">
                 <div class="col">
-                    <div>Center Sectors
+                    <div>
+                        <h3 class="text-center">Center Sectors</h3>
                         <table class="table table-responsive table-hover table-sm" id="svp-center-sectors">
                             <tbody><tr><td>Data Loading...</td></tr></tbody>
                         </table>
                     </div>
-                    <div>Airport Groups
+                    <div class="d-none">
+                        <h3 class="text-center">Airport Groups</h3>
                         <table class="table table-responsive table-hover table-sm" id="svp-airport-groups">
                             <tbody><tr><td>Data Loading...</td></tr></tbody>
                         </table>
                     </div>
-                    <div>Airports
-                        <table class="table table-responsive table-hover table-sm" id="svp-airports">
+                    <div>
+                        <h3 class="text-center">Key Airports (ACPH)</h3>
+                        <table class="table table-responsive table-hover table-sm" id="svp-key-airports">
                             <tbody><tr><td>Data Loading...</td></tr></tbody>
                         </table>
                     </div>

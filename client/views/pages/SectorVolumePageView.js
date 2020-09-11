@@ -6,13 +6,15 @@ export default class SectorVolumePageView {
         this.$element = document.getElementById('sector-volume-page-content');
         this.$centerSectorsElement = document.getElementById('svp-center-sectors');
         this.$airportGroupsElement = document.getElementById('svp-airport-groups');
-        this.$airportsElement = document.getElementById('svp-airports');
+        this.$keyAirportsElement = document.getElementById('svp-key-airports');
 
         this._organization = null;
         this._tableIntervalMinutes = 10;
         this._tableTotalIntervals = 9;
         this._intervals = [];
+        this._airportGroupsTimeTable = [];
         this._centerTimeTable = [];
+        this._keyAirportsTimeTable = [];
 
         this._init(data);
     }
@@ -26,11 +28,18 @@ export default class SectorVolumePageView {
         this._intervals = this._generateIntervals();
 
         this._initCenterTimeTable();
+        this._initAirportGroupsTimeTable();
+        this._initKeyAirportsTimeTable();
+    }
 
-        // eslint-disable-next-line max-len
-        // const basicStructureTemplate = '<div class="row"><div class="col"><div>Center Sectors<table class="table table-striped table-hover table-sm" id="svp-center-sectors"><tbody><tr><td>Data Loading...</td></tr></tbody></table></div><div>Airport Groups<table class="table table-striped table-hover table-sm" id="svp-center-sectors"><tbody><tr><td>Data Loading...</td></tr></tbody></table></div><div>Airports<table class="table table-striped table-hover table-sm" id="svp-center-sectors"><tbody><tr><td>Data Loading...</td></tr></tbody></table></div><div>Notes<br><textarea class="form-control" style="margin-top: 0px; margin-bottom: 0px; height: 180px;"></textarea></div></div><div class="col">right</div></div>';
+    _initAirportGroupsTimeTable() {
+        const groups = this._organization.airportGroupIcaos;
 
-        // this._html = this._createTemplate();
+        for (const groupName in groups) {
+            this._airportGroupsTimeTable.push([groupName, ..._fill(Array(this._tableTotalIntervals), '-')]);
+        }
+
+        this._updateAirportGroupsTableElementFromAirportGroupsTimeTable();
     }
 
     _initCenterTimeTable() { // traffic data WILL NOT BE AVAILABLE YET, so build a template only
@@ -43,32 +52,15 @@ export default class SectorVolumePageView {
         this._updateCenterTableElementFromCenterTimeTable();
     }
 
-    // _createTemplate() {
-    //     const openingDiv = '<div class="row">';
+    _initKeyAirportsTimeTable() { // traffic data WILL NOT BE AVAILABLE YET, so build a template only
+        const icaoList = this._organization._keyAirportIcaos; // ILLEGAL!
 
-    //     // left side
-    //     const centerSectors = '<div>Center Sectors<table class="table table-striped table-hover table-sm" ' +
-    //         'id="svp-center-sectors"><tbody><tr><td>Data Loading...</td></tr></tbody></table></div>';
-    //     const airportGroups = '<div>Airport Groups<table class="table table-striped table-hover table-sm" ' +
-    //         'id="svp-center-sectors"><tbody><tr><td>Data Loading...</td></tr></tbody></table></div>';
-    //     const airports = '<div>Airports<table class="table table-striped table-hover table-sm" ' +
-    //         'id="svp-center-sectors"><tbody><tr><td>Data Loading...</td></tr></tbody></table></div>';
-    //     const notes = '<div>Notes<br><textarea class="form-control"></textarea></div>';
-    //     const leftColumn = `<div class="col">${centerSectors}${airportGroups}${airports}${notes}</div>`;
+        for (const icao of icaoList) {
+            this._keyAirportsTimeTable.push([icao, ..._fill(Array(this._tableTotalIntervals), '-')]);
+        }
 
-    //     // right side
-    //     const tmiReceiving = '<div class="col">TMI Receiving<br><textarea class="form-control"></textarea></div>';
-    //     const tmiProviding = '<div class="col">TMI Providing<br><textarea class="form-control"></textarea></div>';
-    //     const tmiRow = `<div class="row">${tmiReceiving}${tmiProviding}</div>`;
-    //     const situationDisplayRow = '<div class="row">Situation Display</div>';
-    //     const badRouteRow = '<div class="row">Bad Route Detection</div>';
-    //     const rightColumn = `<div class="col">${tmiRow}${situationDisplayRow}${badRouteRow}</div>`;
-
-    //     // all together now!
-    //     const html = `${openingDiv}${leftColumn}${rightColumn}`;
-
-    //     return html;
-    // }
+        this._updateKeyAirportsTableElementFromKeyAirportTimeTable();
+    }
 
     hide() {
         this.$element.classList.add('d-none');
@@ -79,37 +71,13 @@ export default class SectorVolumePageView {
     }
 
     updateCenterSectorsTable() {
-        const sectors = this._organization.centerFacility.getAllSectors();
-        const rows = [];
-
-        for (const sector of sectors) {
-            const rowCounts = [];
-
-            for (const [intervalStart, intervalEnd] of this._intervals) {
-                const sectorTimes = Object.keys(sector.timeTable);
-                const timesWithinThisInterval = sectorTimes.filter((t) => t >= intervalStart && t <= intervalEnd);
-                const maxSimultaneousCount = timesWithinThisInterval.reduce((highestCount, time) => {
-                    const trafficCountThisInterval = sector.timeTable[time].length;
-
-                    return Math.max(highestCount, trafficCountThisInterval);
-                }, 0);
-                // const listsInThisInterval = timesWithinThisInterval.map((t) => sector.timeTable[t]);
-                // const aircraftList = _union(listsInThisInterval);
-
-                const displayedTrafficCount = maxSimultaneousCount === 0 ? '-' : maxSimultaneousCount;
-
-                rowCounts.push(displayedTrafficCount);
-                // rowCounts.push(`<td>${maxSimultaneousCount}</td>`);
-            }
-
-            rows.push([sector.id, ...rowCounts]);
-            // rows.push(`<tr><td>${sector.id}</td>${rowCounts.join('')}</tr>`);
-            // this._centerTimeTable.push([sector.id, ..._fill(Array(this._tableTotalIntervals), '-')]);
-        }
-
-        this._centerTimeTable = rows;
-
+        this._updateCenterTimeTable();
         this._updateCenterTableElementFromCenterTimeTable();
+    }
+
+    updateKeyAirportsTable() {
+        this._updateKeyAirportsTimeTable();
+        this._updateKeyAirportsTableElementFromKeyAirportTimeTable();
     }
 
     /**
@@ -142,15 +110,91 @@ export default class SectorVolumePageView {
         return intervalStartTimes;
     }
 
-    _updateCenterTableElementFromCenterTimeTable() {
-        const intervalsHtml = `<tr><td></td>${this._intervals.map((interval) => {
+    _getIntervalRowHtml() {
+        const intervalsHtml = `<thead><tr><th scope="col"></th>${this._intervals.map((interval) => {
             const intervalTime = new Date(interval[0]);
             const hrs = intervalTime.getUTCHours().toString().padStart(2, '0');
             const min = intervalTime.getUTCMinutes().toString().padStart(2, '0');
 
-            return `<td>${hrs}${min}</td>`;
-        }).join('')}</tr>`;
+            return `<th>${hrs}${min}</th>`;
+        }).join('')}</tr></thead>`;
+
+        return intervalsHtml;
+    }
+
+    _updateAirportGroupsTableElementFromAirportGroupsTimeTable() {
+        const intervalsHtml = this._getIntervalRowHtml();
+        const rowsHtml = this._airportGroupsTimeTable.map((group) => `<tr><td>${group.join('</td><td>')}</td></tr>`);
+        this.$airportGroupsElement.innerHTML = intervalsHtml + rowsHtml.join('');
+    }
+
+    _updateCenterTableElementFromCenterTimeTable() {
+        const intervalsHtml = this._getIntervalRowHtml();
         const rowsHtml = this._centerTimeTable.map((sector) => `<tr><td>${sector.join('</td><td>')}</td></tr>`);
         this.$centerSectorsElement.innerHTML = intervalsHtml + rowsHtml.join('');
+    }
+
+    _updateCenterTimeTable() {
+        const sectors = this._organization.centerFacility.getAllSectors();
+        const rows = [];
+
+        for (const sector of sectors) {
+            const rowCounts = [];
+
+            for (const [intervalStart, intervalEnd] of this._intervals) {
+                const sectorTimes = Object.keys(sector.timeTable);
+                const timesWithinThisInterval = sectorTimes.filter((t) => t >= intervalStart && t <= intervalEnd);
+                const maxSimultaneousCount = timesWithinThisInterval.reduce((highestCount, time) => {
+                    const trafficCountThisInterval = sector.timeTable[time].length;
+
+                    return Math.max(highestCount, trafficCountThisInterval);
+                }, 0);
+                // const listsInThisInterval = timesWithinThisInterval.map((t) => sector.timeTable[t]);
+                // const aircraftList = _union(listsInThisInterval);
+
+                const displayedTrafficCount = maxSimultaneousCount === 0 ? '-' : maxSimultaneousCount;
+
+                rowCounts.push(displayedTrafficCount);
+                // rowCounts.push(`<td>${maxSimultaneousCount}</td>`);
+            }
+
+            rows.push([sector.id, ...rowCounts]);
+            // rows.push(`<tr><td>${sector.id}</td>${rowCounts.join('')}</tr>`);
+            // this._centerTimeTable.push([sector.id, ..._fill(Array(this._tableTotalIntervals), '-')]);
+        }
+
+        this._centerTimeTable = rows;
+    }
+
+    _updateKeyAirportsTableElementFromKeyAirportTimeTable() {
+        const intervalsHtml = this._getIntervalRowHtml();
+        const rowsHtml = this._keyAirportsTimeTable.map((airport) => `<tr><td>${airport.join('</td><td>')}</td></tr>`);
+        this.$keyAirportsElement.innerHTML = intervalsHtml + rowsHtml.join('');
+    }
+
+    _updateKeyAirportsTimeTable() {
+        const airportArrivalLists = this._organization.keyAirportArrivals;
+        const arrivalRatesForAllAirports = [];
+
+        for (const [icao, aircraftList] of Object.entries(airportArrivalLists)) {
+            const allArrivalRatesForThisAirport = [];
+
+            for (const [intervalStart, intervalEnd] of this._intervals) {
+                const arrivalsDuringThisInterval = aircraftList.list.filter((aircraft) => {
+                    return aircraft.eta >= intervalStart && aircraft.eta <= intervalEnd;
+                });
+
+                const trafficCount = arrivalsDuringThisInterval.length;
+                const hourlyTrafficCount = trafficCount / this._tableIntervalMinutes * 60;
+                const roundedHourlyTrafficCount = Math.round((hourlyTrafficCount + Number.EPSILON) * 100) / 100;
+                const displayedHourlyTrafficCount = roundedHourlyTrafficCount === 0 ? '-' : roundedHourlyTrafficCount;
+
+                allArrivalRatesForThisAirport.push(displayedHourlyTrafficCount);
+            }
+
+            arrivalRatesForAllAirports.push([icao, ...allArrivalRatesForThisAirport]);
+        }
+
+        this._keyAirportsTimeTable = arrivalRatesForAllAirports;
     }
 }

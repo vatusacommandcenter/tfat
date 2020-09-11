@@ -81,6 +81,14 @@ export default class AircraftCollection {
         return this;
     }
 
+    get length() {
+        return this._list.length;
+    }
+
+    get list() {
+        return this._list;
+    }
+
     /**
      * Total number of `Aircraft` in the collection
      *
@@ -193,6 +201,23 @@ export default class AircraftCollection {
         const tableBody = tableRows.join('');
 
         return tableBody;
+    }
+
+    /**
+     * Sort all aircraft in the collection by their ETA at their destination
+     *
+     * This is most useful when using `AircraftCollection.filterByDestination(icao).sortByEta()` to get
+     * an AircraftCollection containing only aircraft bound for a particular destination, sorted by ETA
+     *
+     * @for AircraftCollection
+     * @method sortByEta
+     * @returns {AircraftCollection} - `this` AircraftCollection instance
+     * @chainable
+     */
+    sortByEta() {
+        this._list.sort((aircraft1, aircraft2) => aircraft1.eta - aircraft2.eta);
+
+        return this;
     }
 
     /**
