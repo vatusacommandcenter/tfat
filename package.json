@@ -15,7 +15,7 @@
     "_copyHtml": "copyfiles -f client/index.html public && copyfiles -f client/style/* public/style",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node ./server/server.js",
-    "_navDataXmlJson": "xml-js client/navdata/airports.xml --out client/navdata/airports.json --compact && xml-js client/navdata/waypoints.xml --out client/navdata/waypoints.json --compact",
+    "_navDataXmlJson": "xml-js client/navData/Airports.xml --out client/navData/airports.json --compact && xml-js client/navData/Waypoints.xml --out client/navData/waypoints.json --compact",
     "build-navData": "npm run _navDataXmlJson && node devops/parseNavigationData.js",
     "nodemon": "nodemon ./server/server.js",
     "webpack": "webpack --mode=production client/client.js -o public/bundle.js",
