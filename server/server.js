@@ -43,7 +43,7 @@ function updateLocalData() {
             return data;
         } else if (nextMetaData.updateTime < existingMetaData.updateTime) {
             console.warn('Data hiccup from VATSIM! Fresh data is timestamped OLDER than data we already had! ' +
-                `Stored data timestamp: ${existingMetaData.updateTime}` +
+                `Stored data timestamp: ${existingMetaData.updateTime} | ` +
                 `Received data timestamp: ${nextMetaData.updateTime}`);
 
             return;

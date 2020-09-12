@@ -25,6 +25,20 @@ export default class SectorCollection {
     }
 
     /**
+     * Empty all sector time tables so they may be regenerated
+     *
+     * @for SectorCollection
+     * @method _clearAllSectorTimeTables
+     * @returns undefined
+     * @private
+     */
+    _clearAllSectorTimeTables() {
+        for (const sector of this._sectors) {
+            sector.timeTable = {};
+        }
+    }
+
+    /**
      * Return an array of `Sector`s who own the airspace the provided Turf.js Point is within
      *
      * @for SectorCollection
@@ -95,6 +109,8 @@ export default class SectorCollection {
     updateSectorTimeTables(aircraftCollection) {
         const sectorChanges = aircraftCollection.getSectorChanges(); // [ { aircraft, waypoint } ]
         const sortedSectorChanges = sectorChanges.sort((a, b) => a.waypoint.time - b.waypoint.time);
+
+        this._clearAllSectorTimeTables();
 
         for (const { aircraft, waypoint } of sortedSectorChanges) {
             const { enter, exit } = waypoint.sectorChange;

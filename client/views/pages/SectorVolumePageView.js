@@ -1,4 +1,5 @@
 import _fill from 'lodash/fill.js';
+import _findLast from 'lodash/findLast.js';
 import { TIME } from '../../../globalConstants.js';
 
 export default class SectorVolumePageView {
@@ -179,7 +180,20 @@ export default class SectorVolumePageView {
 
             for (const [intervalStart, intervalEnd] of this._intervals) {
                 const sectorTimes = Object.keys(sector.timeTable);
-                const timesWithinThisInterval = sectorTimes.filter((t) => t >= intervalStart && t <= intervalEnd);
+                let timesWithinThisInterval = sectorTimes.filter((t) => t >= intervalStart && t <= intervalEnd);
+
+                if (timesWithinThisInterval.length === 0) { // if no volume changes during this interval
+                    const previousSectorState = _findLast(sectorTimes, (t) => t < intervalStart);
+
+                    if (typeof previousSectorState === 'undefined') {
+                        rowCounts.push('-');
+
+                        continue;
+                    }
+
+                    timesWithinThisInterval = [previousSectorState]; // use the previous sector state
+                }
+
                 const maxSimultaneousCount = timesWithinThisInterval.reduce((highestCount, time) => {
                     const trafficCountThisInterval = sector.timeTable[time].length;
 
