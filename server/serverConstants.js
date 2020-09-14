@@ -22,7 +22,7 @@ export const assumedSourceDataUpdateRateMs = 60000;
 
 /**
  * The frequency at which the server will request new data from the source VATSIM data feed
- * MAX 2,147,483,647 (32-bit signed int) - use 60000 * 10000
+ * MAX 2,147,483,647 (32-bit signed int) - use 60000 * 10,000
  *
  * @enum dataRequestIntervalMs
  * @type {number}

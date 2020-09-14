@@ -128,6 +128,27 @@ export default class AircraftCollection {
     }
 
     /**
+     * Return an `AircraftCollection` including all `Aircraft` landing at any of the specified destinations
+     *
+     * @for AircraftCollection
+     * @param {array<string>} destinationList - array of ICAO identifiers of the destination airports to filter by
+     * @returns {AircraftCollection}
+     */
+    filterByDestinations(destinationList) {
+        const aircraftList = [];
+
+        for (const destination of destinationList) {
+            const list = this._list.filter((ac) => ac.destination.toUpperCase() === destination);
+
+            aircraftList.push(...list);
+        }
+
+        const filteredAircraftCollection = this.generateNewCollectionWithAircraft(aircraftList);
+
+        return filteredAircraftCollection;
+    }
+
+    /**
      * Return an `AircraftCollection` including all `Aircraft` landing at any
      * destination included within the specified destination group
      *

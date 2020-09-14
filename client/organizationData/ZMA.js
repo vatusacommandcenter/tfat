@@ -1,6 +1,6 @@
 export const ZMA = {
     organizationName: 'Miami ARTCC',
-    keyAirports: ['KTNT', 'KMIA', 'KFLL', 'KTPA', 'KSRQ', 'KPBI', 'KRSW', 'KEYW', 'KMCO', 'MYNN'],
+    keyAirports: ['KMIA', 'KFLL', 'KTPA', 'KSRQ', 'KPBI', 'KRSW', 'KEYW', 'KMCO', 'MYNN'],
     airportGroups: {
         MIA: ['07FA', 'KFLL', 'KFXE', 'KHST', 'KHWO', 'KMIA', 'KOPF', 'KPMP', 'KTMB', 'KTNT', 'X51'],
         TPA: ['22FA', '48X', '5FD7', 'FA40', 'KBKV', 'KBOW', 'KCLW', 'KGIF', 'KLAL', 'KMCF', 'KPCM', 'KPIE', 'KSPG', 'KSRQ', 'KTPA', 'KTPF', 'KVDF', 'KVNC', 'KZPH', 'X05', 'X39', 'X49'],
