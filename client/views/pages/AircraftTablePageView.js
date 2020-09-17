@@ -21,7 +21,7 @@ export default class AircraftTablePageView {
          * @type {number}
          * @private
          */
-        this._columnLabels = ['callsign', 'type', 'origin', 'dest', 'altitude', 'route dist | ETA'];
+        this._columnLabels = ['callsign', 'type', 'origin', 'dest', 'altitude', 'speed', 'rte dist', 'eta'];
 
         this._tableHead = '';
 

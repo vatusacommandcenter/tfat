@@ -4,16 +4,21 @@ import lineIntersect from '@turf/line-intersect';
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
 
 export default class Sector {
-    constructor(id, data) {
+    constructor(facilityId, sectorId, data) {
         this._polygons = [];
-        this._id = id;
+        this._facilityId = facilityId;
+        this._sectorId = sectorId;
         this.timeTable = {};
 
         this._init(data);
     }
 
     get id() {
-        return this._id;
+        return this._sectorId;
+    }
+
+    get facilityId() {
+        return this._facilityId;
     }
 
     _init(data) {

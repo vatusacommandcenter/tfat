@@ -56,6 +56,7 @@
     <main role="main" class="flex-shrink-0">
         <div class="container" id="main-content">
 
+            <!-- Aircraft Table Page -->
             <div class="col" id="aircraft-table-page-content">
                 <h2 class="text-center">Online Aircraft:</h2>
                 <table class="table table-striped table-hover table-sm" id="atp-aircraft-table">
@@ -63,8 +64,9 @@
                 </table>
             </div>
 
+            <!-- Sector Volume Page ("Flow") -->
             <div class="row d-none" id="sector-volume-page-content">
-                <div class="col">
+                <div class="col-md-7">
                     <div>
                         <h3 class="text-center">Center Sectors</h3>
                         <table class="table table-responsive table-hover table-sm" id="svp-center-sectors">
@@ -78,14 +80,14 @@
                         </table>
                     </div>
                     <div class="d-none">
-                        <h3 class="text-center">Airport Groups</h3>
-                        <table class="table table-responsive table-hover table-sm" id="svp-airport-groups">
+                        <h3 class="text-center">Other Facilities</h3>
+                        <table class="table table-responsive table-hover table-sm" id="svp-other-facilities">
                             <tbody><tr><td>Data Loading...</td></tr></tbody>
                         </table>
                     </div>
                     <div>Notes<br><textarea class="form-control"></textarea></div>
                 </div>
-                <div class="col">
+                <div class="col-md-5">
                     <div class="row">
                         <div class="col">TMI Receiving<br><textarea class="form-control"></textarea></div>
                         <div class="col">TMI Providing<br><textarea class="form-control"></textarea></div>

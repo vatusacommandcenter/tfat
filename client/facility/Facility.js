@@ -48,6 +48,10 @@ export default class Facility {
         this._init(data);
     }
 
+    get id() {
+        return this._facilityIdentifier;
+    }
+
     _init(data) {
         if (!('sectors' in data)) {
             throw new TypeError(`Expected ${data.facilityName} (${this._facilityIdentifier}) ` +
@@ -56,7 +60,7 @@ export default class Facility {
 
         this._airspaceExlusionFacilities = data.airspaceExclusionFacilities;
         this._facilityName = data.facilityName;
-        this._sectorCollection = new SectorCollection(data.sectors);
+        this._sectorCollection = new SectorCollection(this._facilityIdentifier, data.sectors);
     }
 
     /**

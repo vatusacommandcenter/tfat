@@ -6,7 +6,7 @@ export default class SectorVolumePageView {
     constructor(data) {
         this.$element = document.getElementById('sector-volume-page-content');
         this.$centerSectorsElement = document.getElementById('svp-center-sectors');
-        this.$airportGroupsElement = document.getElementById('svp-airport-groups');
+        this.$airportGroupsElement = document.getElementById('svp-other-facilities');
         this.$keyAirportsElement = document.getElementById('svp-key-airports');
 
         this._organization = null;
@@ -100,7 +100,7 @@ export default class SectorVolumePageView {
     }
 
     updateAirportGroupsTable() {
-        // this._updateAirportGroupsTimeTable();
+        this._updateAirportGroupsTimeTable();
         this._updateAirportGroupsTableElementFromAirportGroupsTimeTable();
     }
 
@@ -165,6 +165,18 @@ export default class SectorVolumePageView {
         this.$airportGroupsElement.innerHTML = intervalsHtml + rowsHtml.join('');
     }
 
+    _updateAirportGroupsTimeTable() {
+        const airportGroupsTimeTable = [];
+
+        for (const facilityId in this._organization.nonCenterFacilities) { // for each facility
+            const sectors = this._organization.nonCenterFacilities[facilityId].getAllSectors();
+            const timeTables = sectors.map((sector) => this._getTimeTableForSector(sector));
+            airportGroupsTimeTable.push(...timeTables);
+        }
+
+        this._airportGroupsTimeTable = airportGroupsTimeTable;
+    }
+
     _updateCenterTableElementFromCenterTimeTable() {
         const intervalsHtml = this._getIntervalRowHtml();
         const rowsHtml = this._centerTimeTable.map((sector) => `<tr><td>${sector.join('</td><td>')}</td></tr>`);
@@ -173,47 +185,44 @@ export default class SectorVolumePageView {
 
     _updateCenterTimeTable() {
         const sectors = this._organization.centerFacility.getAllSectors();
-        const rows = [];
+        const timeTables = sectors.map((sector) => this._getTimeTableForSector(sector));
+        this._centerTimeTable = timeTables;
+    }
 
-        for (const sector of sectors) {
-            const rowCounts = [];
+    _getTimeTableForSector(sector) {
+        const rowCounts = [];
 
-            for (const [intervalStart, intervalEnd] of this._intervals) {
-                const sectorTimes = Object.keys(sector.timeTable);
-                let timesWithinThisInterval = sectorTimes.filter((t) => t >= intervalStart && t <= intervalEnd);
+        for (const [intervalStart, intervalEnd] of this._intervals) {
+            const sectorTimes = Object.keys(sector.timeTable);
+            let timesWithinThisInterval = sectorTimes.filter((t) => t >= intervalStart && t <= intervalEnd);
 
-                if (timesWithinThisInterval.length === 0) { // if no volume changes during this interval
-                    const previousSectorState = _findLast(sectorTimes, (t) => t < intervalStart);
+            if (timesWithinThisInterval.length === 0) { // if no volume changes during this interval
+                const previousSectorState = _findLast(sectorTimes, (t) => t < intervalStart);
 
-                    if (typeof previousSectorState === 'undefined') {
-                        rowCounts.push('-');
+                if (typeof previousSectorState === 'undefined') {
+                    rowCounts.push('-');
 
-                        continue;
-                    }
-
-                    timesWithinThisInterval = [previousSectorState]; // use the previous sector state
+                    continue;
                 }
 
-                const maxSimultaneousCount = timesWithinThisInterval.reduce((highestCount, time) => {
-                    const trafficCountThisInterval = sector.timeTable[time].length;
-
-                    return Math.max(highestCount, trafficCountThisInterval);
-                }, 0);
-                // const listsInThisInterval = timesWithinThisInterval.map((t) => sector.timeTable[t]);
-                // const aircraftList = _union(listsInThisInterval);
-
-                const displayedTrafficCount = maxSimultaneousCount === 0 ? '-' : maxSimultaneousCount;
-
-                rowCounts.push(displayedTrafficCount);
-                // rowCounts.push(`<td>${maxSimultaneousCount}</td>`);
+                timesWithinThisInterval = [previousSectorState]; // use the previous sector state
             }
 
-            rows.push([sector.id, ...rowCounts]);
-            // rows.push(`<tr><td>${sector.id}</td>${rowCounts.join('')}</tr>`);
-            // this._centerTimeTable.push([sector.id, ..._fill(Array(this._tableTotalIntervals), '-')]);
+            const maxSimultaneousCount = timesWithinThisInterval.reduce((highestCount, time) => {
+                const trafficCountThisInterval = sector.timeTable[time].length;
+
+                return Math.max(highestCount, trafficCountThisInterval);
+            }, 0);
+            // const listsInThisInterval = timesWithinThisInterval.map((t) => sector.timeTable[t]);
+            // const aircraftList = _union(listsInThisInterval);
+
+            const displayedTrafficCount = maxSimultaneousCount === 0 ? '-' : maxSimultaneousCount;
+
+            rowCounts.push(displayedTrafficCount);
+            // rowCounts.push(`<td>${maxSimultaneousCount}</td>`);
         }
 
-        this._centerTimeTable = rows;
+        return [sector.id, ...rowCounts];
     }
 
     _updateKeyAirportsTableElementFromKeyAirportTimeTable() {

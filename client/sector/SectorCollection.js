@@ -5,8 +5,9 @@ import Sector from './Sector.js';
 import Waypoint from '../aircraft/Waypoint.js';
 
 export default class SectorCollection {
-    constructor(sectorsData) {
+    constructor(facilityId, sectorsData) {
         this._sectors = [];
+        this._facilityId = facilityId;
 
         this._init(sectorsData);
     }
@@ -14,7 +15,7 @@ export default class SectorCollection {
     _init(sectorsData) {
         for (const sectorId in sectorsData) {
             const sectorData = sectorsData[sectorId];
-            const sector = new Sector(sectorId, sectorData);
+            const sector = new Sector(this._facilityId, sectorId, sectorData);
 
             this._sectors.push(sector);
         }
@@ -158,9 +159,3 @@ export default class SectorCollection {
         }
     }
 }
-
-// const sectorCollection = {
-//     20: new Sector(centerSectors[20]),
-//     23: new Sector(centerSectors[23]),
-//     46: new Sector(centerSectors[46])
-// };

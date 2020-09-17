@@ -8,12 +8,33 @@ export default class Organization {
         this._keyAirportIcaos = [];
         this.keyAirportArrivals = [];
         this.airportGroupIcaos = {};
-        // TODO: Change this to replace centerFacility with simply:
-        // this._facilities = { this._identifier: new Facility() , F11: new Facility(), ...}
-        this.centerFacility = null;
-        this.nonCenterFacilities = {};
+        this.facilities = {}; // { this._identifier: new Facility() , F11: new Facility(), ...}
 
         this._init(data);
+    }
+
+    /**
+     * `Facility` instance representing the en route facility of this `Organization`
+     *
+     * @for Organization
+     * @property centerFacility
+     * @type {Facility}
+     */
+    get centerFacility() {
+        return this.facilities[this._identifier];
+    }
+
+    get nonCenterFacilities() {
+        const facilities = {};
+        const allFacilityIds = Object.keys(this.facilities);
+
+        for (const id of allFacilityIds) {
+            if (id !== this._identifier) {
+                facilities[id] = this.facilities[id];
+            }
+        }
+
+        return facilities;
     }
 
     _init(data) {
@@ -42,10 +63,13 @@ export default class Organization {
 
     _initCenterFacility(data) {
         if (!('center' in data)) {
-            throw new TypeError(`Expected a 'center' property in ${this.id}'s organization data, but none exists!`);
+            throw new TypeError(`Expected a 'center' property in ${this._identifier}'s ` +
+                'organization data, but none exists!');
         }
 
-        this.centerFacility = new Facility(this._identifier, data.center);
+        const centerFacility = new Facility(this._identifier, data.center);
+
+        this.facilities[this._identifier] = (centerFacility);
     }
 
     _initNonCenterFacilities(data) {
@@ -53,15 +77,20 @@ export default class Organization {
             return;
         }
 
-        for (const facilityId of data) {
-            if (facilityId === 'center' || facilityId === 'organizationName') {
+        for (const [facilityId, facilityData] of Object.entries(data)) {
+            if (facilityId === 'center' || facilityId === this._identifier) {
                 continue;
             }
 
-            const facilityData = data[facilityId];
+            // const facilityData = data[facilityId];
             const facility = new Facility(facilityId, facilityData);
 
-            this.nonCenterFacilities[facilityId] = facility;
+            if (facilityId in this.facilities) {
+                throw new TypeError(`Multiple facilities within ${this._organizationName} (${this._identifier}) ` +
+                    `exist with a facility identifier of ${facilityId}; these IDs must be unique!`);
+            }
+
+            this.facilities[facilityId] = facility;
         }
     }
 
@@ -87,7 +116,13 @@ export default class Organization {
      * @returns {array<Sector>}
      */
     getSectorsFromTurfPoint(turfPoint) {
-        return this.centerFacility.getSectorsFromTurfPoint(turfPoint);
+        const sectors = [];
+
+        for (const facilityId in this.facilities) {
+            sectors.push(...this.facilities[facilityId].getSectorsFromTurfPoint(turfPoint));
+        }
+
+        return sectors;
     }
 
     /**
@@ -99,7 +134,9 @@ export default class Organization {
      * @returns undefined
      */
     updateSectorTimeTables(aircraftCollection) {
-        this.centerFacility.updateSectorTimeTables(aircraftCollection);
+        for (const facilityId in this.facilities) {
+            this.facilities[facilityId].updateSectorTimeTables(aircraftCollection);
+        }
     }
 
     /**

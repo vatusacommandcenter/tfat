@@ -74,12 +74,21 @@ export default class Aircraft {
         const currentLatLon = `${this.latitude},${this.longitude}`;
         const url = `https://skyvector.com/?ll=${currentLatLon}&chart=304&zoom=10&fpl=%20` +
             `${this.route._waypoints.map((wp) => wp.icao).join('%20')}`;
-        const text = `${this.route.getFullRouteLength()} nm | ETA: ${this.eta.toUTCString()}`;
-        const ahref = `<a href="${url}" target="_blank">${text}</a>`;
+        // const text = `${this.route.getFullRouteLength()} nm | ETA: ${this.eta.toUTCString()}`;
 
-        const html = `<tr><td>${this.callsign}</td><td>${this.fpAircraft}</td><td>${this.fpOrigin}</td>` +
+        const { callsign } = this;
+        const type = this.fpAircraft.length > 11 ? `${this.fpAircraft.substr(0, 8)}...` : this.fpAircraft;
+        const origin = this.fpOrigin;
+        const { destination } = this;
+        const { altitude } = this;
+        const speed = this.groundSpeed;
+        const distance = `${this.route.getFullRouteLength()} nm`;
+        const distanceLink = `<a href="${url}" target="_blank">${distance}</a>`;
+        const eta = this.eta.toUTCString();
+
+        const html = `<tr><td>${callsign}</td><td>${type}</td><td>${origin}</td>` +
             // `<td>${this.destination}</td><td>${this.altitude}</td><td>${this.groundSpeed}</td></tr>`;
-            `<td>${this.destination}</td><td>${this.altitude}</td><td>${ahref}</td></tr>`;
+            `<td>${destination}</td><td>${altitude}</td><td>${speed}</td><td>${distanceLink}</td><td>${eta}</td></tr>`;
 
         return html;
     }

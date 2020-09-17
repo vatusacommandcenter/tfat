@@ -1,10 +1,22 @@
+body {
+    font-family: 'B612 Mono', monospace;
+}
+
+#sector-volume-page-content h3 {
+    font-weight: bold;
+}
+
+#sector-volume-page-content .table thead th {
+    font-weight: normal;
+}
+
 #svp-center-sectors td {
     padding: .1rem .3rem;
     text-align: center;
     border: 1px solid #dee2e6;
 }
 
-#svp-airport-groups td {
+#svp-other-facilities td {
     padding: .1rem .3rem;
     text-align: center;
     border: 1px solid #dee2e6;
