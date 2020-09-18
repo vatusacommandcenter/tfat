@@ -1,5 +1,6 @@
 import _fill from 'lodash/fill.js';
 import _findLast from 'lodash/findLast.js';
+import _union from 'lodash/union.js';
 import { TIME } from '../../../globalConstants.js';
 
 export default class SectorVolumePageView {
@@ -191,6 +192,7 @@ export default class SectorVolumePageView {
 
     _getTimeTableForSector(sector) {
         const rowCounts = [];
+        const cellsInRow = [];
 
         for (const [intervalStart, intervalEnd] of this._intervals) {
             const sectorTimes = Object.keys(sector.timeTable);
@@ -213,14 +215,17 @@ export default class SectorVolumePageView {
 
                 return Math.max(highestCount, trafficCountThisInterval);
             }, 0);
-            // const listsInThisInterval = timesWithinThisInterval.map((t) => sector.timeTable[t]);
-            // const aircraftList = _union(listsInThisInterval);
+            const listsInThisInterval = timesWithinThisInterval.map((t) => sector.timeTable[t]);
+            const aircraftList = _union(listsInThisInterval)[0].map((ac) => ac.callsign);
+            cellsInRow.push(aircraftList);
 
             const displayedTrafficCount = maxSimultaneousCount === 0 ? '-' : maxSimultaneousCount;
 
             rowCounts.push(displayedTrafficCount);
             // rowCounts.push(`<td>${maxSimultaneousCount}</td>`);
         }
+
+        console.log([sector.id, ...cellsInRow]);
 
         return [sector.id, ...rowCounts];
     }

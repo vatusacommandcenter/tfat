@@ -96,15 +96,24 @@ export default class Organization {
 
     /**
      * Return an array of `Waypoint`s for each position where the provided
-     * Turf.js LineString intersects any polygon of any center sector
+     * Turf.js LineString intersects any polygon of any sector of any facility
      *
      * @for Organization
-     * @method getCenterSectorBoundaryCrossingWaypoints
+     * @method getSectorBoundaryCrossingWaypoints
      * @param {turf.lineString} turfLineString
      * @returns {array<Waypoint>}
      */
-    getCenterSectorBoundaryCrossingWaypoints(turfLineString) {
-        return this.centerFacility.getIntersectionsWithTurfLineString(turfLineString);
+    getSectorBoundaryCrossingWaypoints(turfLineString) {
+        const waypoints = [];
+
+        for (const facilityId in this.facilities) {
+            const facility = this.facilities[facilityId];
+            const waypointsForThisFacility = facility.getIntersectionsWithTurfLineString(turfLineString);
+
+            waypoints.push(...waypointsForThisFacility);
+        }
+
+        return waypoints;
     }
 
     /**

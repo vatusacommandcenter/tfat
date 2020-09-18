@@ -21,6 +21,7 @@ export const ZMA = {
         center: {
             airspaceExclusionFacilities: ['MIA', 'TPA', 'PBI', 'RSW', 'NQX', 'F11'],
             facilityName: 'Miami Center',
+            defaultSectorId: 46,
             sectors: {
                 5: [
                     {
@@ -472,6 +473,7 @@ export const ZMA = {
         MIA: {
             airspaceExclusionFacilities: [],
             facilityName: 'Miami Approach',
+            defaultSectorId: 'MIA',
             sectors: {
                 MIA: [
                     {
@@ -522,6 +524,7 @@ export const ZMA = {
         TPA: {
             airspaceExclusionFacilities: [],
             facilityName: 'Tampa Approach',
+            defaultSectorId: 'TPA',
             sectors: {
                 TPA: [
                     {
@@ -582,6 +585,7 @@ export const ZMA = {
         PBI: {
             airspaceExclusionFacilities: [],
             facilityName: 'Palm Beach Approach',
+            defaultSectorId: 'PBI',
             sectors: {
                 PBI: [
                     {
@@ -635,6 +639,7 @@ export const ZMA = {
         RSW: {
             airspaceExclusionFacilities: [],
             facilityName: 'Ft Myers Approach',
+            defaultSectorId: 'RSW',
             sectors: {
                 RSW: [
                     {
@@ -694,6 +699,7 @@ export const ZMA = {
         NQX: {
             airspaceExclusionFacilities: [],
             facilityName: 'Navy Key West Approach',
+            defaultSectorId: 'NQX',
             sectors: {
                 NQX: [
                     {
@@ -720,6 +726,7 @@ export const ZMA = {
         F11: {
             airspaceExclusionFacilities: [],
             facilityName: 'Orlando Approach',
+            defaultSectorId: 'F11',
             sectors: {
                 F11: [
                     {
@@ -775,6 +782,7 @@ export const ZMA = {
         MYNN: {
             airspaceExclusionFacilities: [],
             facilityName: 'Nassau Approach',
+            defaultSectorId: 'MYNN',
             sectors: {
                 MYNN: [
                     {
@@ -799,6 +807,7 @@ export const ZMA = {
         ZJX: {
             airspaceExclusionFacilities: ['F11'],
             facilityName: 'Jacksonville Center',
+            defaultSectorId: 'ZJX',
             sectors: {
                 ZJX: [
                     {

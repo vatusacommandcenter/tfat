@@ -8,6 +8,7 @@ export default class Sector {
         this._polygons = [];
         this._facilityId = facilityId;
         this._sectorId = sectorId;
+        this.subSectors = [];
         this.timeTable = {};
 
         this._init(data);

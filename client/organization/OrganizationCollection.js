@@ -53,15 +53,15 @@ export default class OrganizationCollection {
 
     /**
      * Return an array of `Waypoint`s for each position where the provided Turf.js LineString
-     * intersects any polygon of any center sector of the active organization
+     * intersects any polygon of any sector of any facility in the active organization
      *
      * @for OrganizationCollection
-     * @method getCenterSectorBoundaryCrossingWaypoints
+     * @method getSectorBoundaryCrossingWaypoints
      * @param {turf.LineString} turfLineString
      * @returns {array<Waypoint>}
      */
-    getCenterSectorBoundaryCrossingWaypoints(turfLineString) {
-        return this.activeOrganization.getCenterSectorBoundaryCrossingWaypoints(turfLineString);
+    getSectorBoundaryCrossingWaypoints(turfLineString) {
+        return this.activeOrganization.getSectorBoundaryCrossingWaypoints(turfLineString);
     }
 
     /**

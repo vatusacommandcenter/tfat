@@ -16,7 +16,7 @@ export default class Waypoint {
         this.distanceFromPreviousWaypoint = 0; // set by the `Route`
         this.headingToNextWaypoint = null; // set by the `Route`
         this.time = null; // set by the `Route`
-        this.isAircraftPosition = isAircraftPosition;
+        this._isAircraftPosition = isAircraftPosition;
         this._navDataRef = null;
         this._position = { lat: 0, lon: 0 };
 
@@ -180,7 +180,7 @@ export default class Waypoint {
      * @returns {boolean}
      */
     isAircraftPosition() {
-        return this.isAircraftPosition;
+        return this._isAircraftPosition;
     }
 
     isAirport() {

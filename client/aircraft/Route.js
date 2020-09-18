@@ -213,6 +213,15 @@ export default class Route {
         for (let i = 1; i < this._waypoints.length; i++) {
             const waypoint = this._waypoints[i];
 
+            // for aircraft landing at their destination (must be an airport, not a fix)
+            if (i === this._waypoints.length - 1) {
+                if (waypoint.isAirport()) {
+                    const unexitedSectors = this._getUnexitedSectors();
+
+                    waypoint.sectorChange.exit.push(...unexitedSectors);
+                }
+            }
+
             if (waypoint.sectorBoundaryPolygons.length === 0) {
                 continue;
             }
@@ -246,7 +255,7 @@ export default class Route {
      * @private
      */
     _getCurrentWaypointIndex() {
-        return this._waypoints.findIndex((wp) => wp.isAircraftPosition);
+        return this._waypoints.findIndex((wp) => wp.isAircraftPosition());
     }
 
     /**
@@ -295,6 +304,39 @@ export default class Route {
     }
 
     /**
+     * Return an array of `Sector`s this route has entered but never exited
+     *
+     * @for Route
+     * @method _getUnexitedSectors
+     * @return {array<Sector>}
+     */
+    _getUnexitedSectors() {
+        const sectors = [];
+
+        // add sectors entered
+        for (const waypoint of this._waypoints) {
+            if (waypoint.sectorChange.enter.length > 0) {
+                sectors.push(...waypoint.sectorChange.enter);
+            }
+        }
+
+        // remove sectors exited
+        for (const waypoint of this._waypoints) {
+            if (waypoint.sectorChange.exit.length > 0) {
+                const sectorsExited = waypoint.sectorChange.exit;
+                const indexList = sectorsExited.map((sector) => sectors.indexOf(sector));
+
+                for (const i of indexList) {
+                    sectors.splice(i, 1);
+                }
+            }
+        }
+
+        // return sectors entered but not exited
+        return sectors;
+    }
+
+    /**
      * Insert the provided aircraft current position as a waypoint at the appropriate position within the waypoint list
      *
      * @for Route
@@ -317,13 +359,13 @@ export default class Route {
             const waypoint = this._waypoints[i];
             const nextWaypoint = this._waypoints[i + 1];
             const turfLineString = lineString([waypoint.coordinatesLonLat, nextWaypoint.coordinatesLonLat]);
-            const centerBoundaryWaypoints = organizationCollection.getCenterSectorBoundaryCrossingWaypoints(turfLineString);
+            const boundaryWaypoints = organizationCollection.getSectorBoundaryCrossingWaypoints(turfLineString);
 
-            if (centerBoundaryWaypoints.length === 0) {
+            if (boundaryWaypoints.length === 0) {
                 continue;
             }
 
-            const sortedCenterBoundaryWaypoints = centerBoundaryWaypoints.sort((wpA, wpB) => {
+            boundaryWaypoints.sort((wpA, wpB) => {
                 const distanceToWpA = distance(waypoint.turfPoint, wpA.turfPoint);
                 const distanceToWpB = distance(waypoint.turfPoint, wpB.turfPoint);
 
@@ -331,19 +373,19 @@ export default class Route {
             });
 
             // combine back-to-back waypoints for exiting one sector and entering another at the same location
-            for (let j = 0; j < sortedCenterBoundaryWaypoints.length - 1; j++) {
-                const thisIndexWp = sortedCenterBoundaryWaypoints[j];
-                const nextIndexWp = sortedCenterBoundaryWaypoints[j + 1];
+            for (let j = 0; j < boundaryWaypoints.length - 1; j++) {
+                const thisIndexWp = boundaryWaypoints[j];
+                const nextIndexWp = boundaryWaypoints[j + 1];
 
                 if (thisIndexWp.isCollocatedWithWaypoint(nextIndexWp)) { // if collocated, merge waypoint sector poly data
                     thisIndexWp.sectorBoundaryPolygons.push(...nextIndexWp.sectorBoundaryPolygons);
-                    sortedCenterBoundaryWaypoints.splice(j + 1, 1);
+                    boundaryWaypoints.splice(j + 1, 1);
                 }
             }
 
-            this._waypoints.splice(i + 1, 0, ...sortedCenterBoundaryWaypoints);
+            this._waypoints.splice(i + 1, 0, ...boundaryWaypoints);
 
-            i += sortedCenterBoundaryWaypoints.length;
+            i += boundaryWaypoints.length;
         }
 
         this._generateSectorEntryExitData(organizationCollection);
@@ -475,6 +517,23 @@ export default class Route {
 
         for (let i = indexOfClosestWaypoint; i < waypointInfo.length; i++) {
             if (i === waypointInfo.length - 1) { // if last waypoint is the closest waypoint
+                if (proposedWaypoint.isAircraftPosition() && this._waypoints.length >= 2) {
+                    // if total route heading aligns with heading OUT of last fix TO aircraft,
+                    // then we know the aircraft has PASSED their last fix and no further trajectory
+                    // is known-- probably due to a lack of nav data coverage. We will "project" the
+                    // aircraft to remain at its current position, which will update over time, but
+                    // we cannot truly "predict" where it will go without better nav data coverage.
+                    const totalHeading = bearing(this._waypoints[0].turfPoint, this._waypoints[i].turfPoint);
+                    const headingFromLastToAircraft = bearing(this._waypoints[i].turfPoint, proposedWaypoint.turfPoint);
+                    const angDifference = calculateAngleDifference(headingFromLastToAircraft, totalHeading);
+
+                    if (Math.abs(angDifference) < MAX_TURN_ANGLE_BEFORE_SKIPPING_FIX_DEG) {
+                        insertionIndex = i + 1; // as new last waypoint
+
+                        break;
+                    }
+                }
+
                 insertionIndex = i;
 
                 break;
@@ -488,23 +547,18 @@ export default class Route {
         }
 
         // set the .headingToNextWaypoint
-        const nextWaypoint = this._waypoints[insertionIndex];
-        const headingToNextWaypoint = bearing360(proposedWaypoint.turfPoint, nextWaypoint.turfPoint);
-        proposedWaypoint.headingToNextWaypoint = headingToNextWaypoint;
+        if (insertionIndex === this._waypoints.length && this._waypoints.length > 0) { // if inserting as the new last waypoint
+            const previouseWaypoint = this._waypoints[insertionIndex - 1];
+            const headingFromPreviousWaypoint = bearing360(previouseWaypoint.turfPoint, proposedWaypoint.turfPoint);
+            proposedWaypoint.headingToNextWaypoint = headingFromPreviousWaypoint;
+        } else {
+            const nextWaypoint = this._waypoints[insertionIndex];
+            const headingToNextWaypoint = bearing360(proposedWaypoint.turfPoint, nextWaypoint.turfPoint);
+            proposedWaypoint.headingToNextWaypoint = headingToNextWaypoint;
+        }
 
         // insert the current position waypoint at the appropriate position
         this._waypoints.splice(insertionIndex, 0, proposedWaypoint);
-
-        // for (const waypoint of this._waypoints) {
-        //     // const aircraftPositionTurfPoint = point(aircraftPosition,)
-        //     const bearingFromProposedWaypoint = bearing(aircraftPositionWaypoint.turfPoint, waypoint.turfPoint);
-        //     const angularDifference = calculateAngleDifference(waypoint.headingToNextWaypoint, bearingFromProposedWaypoint);
-
-        //     // if (Math.abs(angularDifference) < MAX_TURN_ANGLE_BEFORE_SKIPPING_FIX_DEG) {
-        //     // }
-
-        //     distanceFromWaypoints.push()
-        // }
     }
 
     _insertWaypoints(waypoints) {

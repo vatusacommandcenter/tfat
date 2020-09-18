@@ -1,3 +1,4 @@
+import _without from 'lodash/without.js';
 import SectorCollection from '../sector/SectorCollection.js';
 
 export default class Facility {
@@ -17,6 +18,9 @@ export default class Facility {
          * @private
          */
         this._airspaceExlusionFacilities = [];
+
+        // TODO: Change me to _defaultSectorConfiguration, where we can combine ZMA-->46 and ZMO-->62
+        this._defaultSectorId = null;
 
         /**
          * Written name of the facility (ie 'Miami Center')
@@ -59,8 +63,73 @@ export default class Facility {
         }
 
         this._airspaceExlusionFacilities = data.airspaceExclusionFacilities;
+        this._defaultSectorId = String(data.defaultSectorId);
         this._facilityName = data.facilityName;
         this._sectorCollection = new SectorCollection(this._facilityIdentifier, data.sectors);
+
+        this.combineAllSectorsToDefault();
+    }
+
+    /**
+     * Combine all `Sector`s in the `Facility`'s `SectorCollection` to the default sector
+     *
+     * @for Facility
+     * @method combineAllSectorsToDefault
+     * @returns undefined
+     */
+    combineAllSectorsToDefault() {
+        const allSectors = this._sectorCollection.sectors;
+        const defaultSector = this._sectorCollection.getSectorWithId(this._defaultSectorId);
+
+        this.combineSectorsTo(allSectors, defaultSector);
+    }
+
+    /**
+     * Mark a sector as being combined at another sector, rather than being open on its own
+     *
+     * @for Facility
+     * @method combineSectorTo
+     * @param {Sector} sectorBeingAbsorbed
+     * @param {Sector} absorbingSector
+     * @returns undefined
+     */
+    combineSectorTo(sectorBeingAbsorbed, absorbingSector) {
+        this.decombineSector(sectorBeingAbsorbed);
+
+        if (sectorBeingAbsorbed.id === absorbingSector.id) {
+            return;
+        }
+
+        absorbingSector.subSectors.push(sectorBeingAbsorbed);
+    }
+
+    /**
+     * Combine multiple sectors to a single sector at the same time
+     *
+     * @for Facility
+     * @method combineSectorsTo
+     * @param {array<Sector>} sectorsBeingAbsorbed
+     * @param {Sector} absorbingSector
+     * @return undefined
+     */
+    combineSectorsTo(sectorsBeingAbsorbed, absorbingSector) {
+        for (const sector of sectorsBeingAbsorbed) {
+            this.combineSectorTo(sector, absorbingSector);
+        }
+    }
+
+    /**
+     * Remove the specified sector from ALL sectors' `Sector.subSectors` arrays
+     *
+     * @for Facility
+     * @method decombineSector
+     * @param {Sector} sector
+     * @returns undefined
+     */
+    decombineSector(sector) {
+        for (const otherSector of this._sectorCollection.sectors) {
+            otherSector.subSectors = _without(otherSector.subSectors, sector);
+        }
     }
 
     /**

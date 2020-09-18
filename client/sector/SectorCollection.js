@@ -12,30 +12,16 @@ export default class SectorCollection {
         this._init(sectorsData);
     }
 
+    get sectors() {
+        return this._sectors;
+    }
+
     _init(sectorsData) {
         for (const sectorId in sectorsData) {
             const sectorData = sectorsData[sectorId];
             const sector = new Sector(this._facilityId, sectorId, sectorData);
 
             this._sectors.push(sector);
-        }
-    }
-
-    get sectors() {
-        return this._sectors;
-    }
-
-    /**
-     * Empty all sector time tables so they may be regenerated
-     *
-     * @for SectorCollection
-     * @method _clearAllSectorTimeTables
-     * @returns undefined
-     * @private
-     */
-    _clearAllSectorTimeTables() {
-        for (const sector of this._sectors) {
-            sector.timeTable = {};
         }
     }
 
@@ -60,15 +46,9 @@ export default class SectorCollection {
      * @return {Sector}
      */
     getSectorWithId(sectorId) {
-        const sectorList = this._sectors.find((sector) => sector.id === sectorId);
+        const sector = this._sectors.find((sector) => sector.id === String(sectorId));
 
-        if (sectorList.length === 0) {
-            return;
-        } else if (sectorList.length > 1) {
-            console.error(`Multiple sectors exist with identifier of ${this._id}! Using the first one.`);
-        }
-
-        return sectorList[0];
+        return sector;
     }
 
     /**
@@ -114,6 +94,7 @@ export default class SectorCollection {
         this._clearAllSectorTimeTables();
 
         for (const { aircraft, waypoint } of sortedSectorChanges) {
+            // if (aircraft.callsign === 'PAO324') debugger;
             const { enter, exit } = waypoint.sectorChange;
             const timeInteger = waypoint.time.getTime();
 
@@ -125,6 +106,10 @@ export default class SectorCollection {
             // check for exits first, so any overwrites favor KEEPING the a/c in the count
             if (exit.length > 0) { // if exiting sector(s)
                 for (const sector of exit) { // for each sector being exited
+                    if (sector.facilityId !== this._facilityId) { // if a sector of a different facility
+                        continue;
+                    }
+
                     if (enter.includes(sector)) { // if exiting one shelf and entering another of the same sector
                         continue;
                     }
@@ -138,6 +123,10 @@ export default class SectorCollection {
 
             if (enter.length > 0) { // if entering new sector(s)
                 for (const sector of enter) { // for each sector being entered
+                    if (sector.facilityId !== this._facilityId) { // if a sector of a different facility
+                        continue;
+                    }
+
                     if (exit.includes(sector)) { // if exiting one shelf and entering another of the same sector
                         continue;
                     }
@@ -156,6 +145,20 @@ export default class SectorCollection {
                     sector.timeTable[timeInteger] = nextAircraftList;
                 }
             }
+        }
+    }
+
+    /**
+     * Empty all sector time tables so they may be regenerated
+     *
+     * @for SectorCollection
+     * @method _clearAllSectorTimeTables
+     * @returns undefined
+     * @private
+     */
+    _clearAllSectorTimeTables() {
+        for (const sector of this._sectors) {
+            sector.timeTable = {};
         }
     }
 }
