@@ -6,9 +6,12 @@ import { TIME } from '../../../globalConstants.js';
 export default class SectorVolumePageView {
     constructor(data) {
         this.$element = document.getElementById('sector-volume-page-content');
-        this.$centerSectorsElement = document.getElementById('svp-center-sectors');
-        this.$airportGroupsElement = document.getElementById('svp-other-facilities');
-        this.$keyAirportsElement = document.getElementById('svp-key-airports');
+        this.$navBarBrandElement = document.getElementById('nav-brand-text');
+        this.$centerSectorsElement = document.getElementById('svp-center-table');
+        this.$centerSectorsTitleElement = document.getElementById('svp-center-title');
+        this.$airportGroupsElement = document.getElementById('svp-other-facilities-table');
+        this.$airportGroupsContent = document.getElementById('svp-other-facilities-content');
+        this.$keyAirportsElement = document.getElementById('svp-key-airports-table');
 
         this._organization = null;
         this._tableIntervalMinutes = 10;
@@ -28,6 +31,7 @@ export default class SectorVolumePageView {
     _init(data) {
         this._organization = data;
 
+        this._initTitles();
         this._regenerateIntervals();
         this._initCenterTimeTable();
         this._initAirportGroupsTimeTable();
@@ -62,6 +66,11 @@ export default class SectorVolumePageView {
         }
 
         this._updateKeyAirportsTableElementFromKeyAirportTimeTable();
+    }
+
+    _initTitles() {
+        this.$navBarBrandElement.innerHTML = this._organization.id;
+        this.$centerSectorsTitleElement.innerHTML = this._organization.centerFacility.name;
     }
 
     hide() {
@@ -161,6 +170,12 @@ export default class SectorVolumePageView {
     }
 
     _updateAirportGroupsTableElementFromAirportGroupsTimeTable() {
+        if (this._airportGroupsTimeTable.length === 0) {
+            this.$airportGroupsContent.classList.add('d-none');
+        } else {
+            this.$airportGroupsContent.classList.remove('d-none');
+        }
+
         const intervalsHtml = this._getIntervalRowHtml();
         const rowsHtml = this._airportGroupsTimeTable.map((group) => `<tr><td>${group.join('</td><td>')}</td></tr>`);
         this.$airportGroupsElement.innerHTML = intervalsHtml + rowsHtml.join('');

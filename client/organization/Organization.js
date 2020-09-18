@@ -2,15 +2,23 @@ import Facility from '../facility/Facility.js';
 
 export default class Organization {
     constructor(id, data) {
-        this._identifier = id;
+        this._id = id;
         this._organizationName = data.organizationName;
 
         this._keyAirportIcaos = [];
         this.keyAirportArrivals = [];
         this.airportGroupIcaos = {};
-        this.facilities = {}; // { this._identifier: new Facility() , F11: new Facility(), ...}
+        this.facilities = {}; // { this._id: new Facility() , F11: new Facility(), ...}
 
         this._init(data);
+    }
+
+    get id() {
+        return this._id;
+    }
+
+    get name() {
+        return this._organizationName;
     }
 
     /**
@@ -21,7 +29,7 @@ export default class Organization {
      * @type {Facility}
      */
     get centerFacility() {
-        return this.facilities[this._identifier];
+        return this.facilities[this._id];
     }
 
     get nonCenterFacilities() {
@@ -29,7 +37,7 @@ export default class Organization {
         const allFacilityIds = Object.keys(this.facilities);
 
         for (const id of allFacilityIds) {
-            if (id !== this._identifier) {
+            if (id !== this._id) {
                 facilities[id] = this.facilities[id];
             }
         }
@@ -39,21 +47,21 @@ export default class Organization {
 
     _init(data) {
         if (!('keyAirports' in data)) {
-            throw new TypeError(`Expected organization ${this._identifier} to have a "keyAirports" ` +
+            throw new TypeError(`Expected organization ${this._id} to have a "keyAirports" ` +
                 'property containing a list of airport ICAO identifiers, but no such property exists!');
         }
 
         this._keyAirportIcaos = data.keyAirports;
 
         if (!('airportGroups' in data)) {
-            throw new TypeError(`Expected organization ${this._identifier} to have a "airportGroups" ` +
+            throw new TypeError(`Expected organization ${this._id} to have a "airportGroups" ` +
                 'property containing airport group data, but no such property exists!');
         }
 
         this.airportGroupIcaos = data.airportGroups;
 
         if (!('facilities' in data)) {
-            throw new TypeError(`Expected organization ${this._identifier} to have a "facilities" ` +
+            throw new TypeError(`Expected organization ${this._id} to have a "facilities" ` +
                 'property containing facility data, but no such property exists!');
         }
 
@@ -63,13 +71,13 @@ export default class Organization {
 
     _initCenterFacility(data) {
         if (!('center' in data)) {
-            throw new TypeError(`Expected a 'center' property in ${this._identifier}'s ` +
+            throw new TypeError(`Expected a 'center' property in ${this._id}'s ` +
                 'organization data, but none exists!');
         }
 
-        const centerFacility = new Facility(this._identifier, data.center);
+        const centerFacility = new Facility(this._id, data.center);
 
-        this.facilities[this._identifier] = (centerFacility);
+        this.facilities[this._id] = (centerFacility);
     }
 
     _initNonCenterFacilities(data) {
@@ -78,7 +86,7 @@ export default class Organization {
         }
 
         for (const [facilityId, facilityData] of Object.entries(data)) {
-            if (facilityId === 'center' || facilityId === this._identifier) {
+            if (facilityId === 'center' || facilityId === this._id) {
                 continue;
             }
 
@@ -86,7 +94,7 @@ export default class Organization {
             const facility = new Facility(facilityId, facilityData);
 
             if (facilityId in this.facilities) {
-                throw new TypeError(`Multiple facilities within ${this._organizationName} (${this._identifier}) ` +
+                throw new TypeError(`Multiple facilities within ${this._organizationName} (${this._id}) ` +
                     `exist with a facility identifier of ${facilityId}; these IDs must be unique!`);
             }
 

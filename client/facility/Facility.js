@@ -56,6 +56,10 @@ export default class Facility {
         return this._facilityIdentifier;
     }
 
+    get name() {
+        return this._facilityName;
+    }
+
     _init(data) {
         if (!('sectors' in data)) {
             throw new TypeError(`Expected ${data.facilityName} (${this._facilityIdentifier}) ` +

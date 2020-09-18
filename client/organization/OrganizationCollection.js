@@ -1,5 +1,5 @@
 import Organization from './Organization.js';
-import { ZMA } from '../organizationData/ZMA.js';
+import { ORGANIZATIONS } from '../organizationData/organizations.js';
 
 export default class OrganizationCollection {
     constructor(initialOrganizationId) {
@@ -39,16 +39,32 @@ export default class OrganizationCollection {
     }
 
     _init(initialOrganizationId) {
-        // update me when adding new facilities!
-        const organizationList = { ZMA };
-
-        for (const organizationIdentifier in organizationList) {
-            const organizationData = organizationList[organizationIdentifier];
+        for (const organizationIdentifier in ORGANIZATIONS) {
+            const organizationData = ORGANIZATIONS[organizationIdentifier];
             const organization = new Organization(organizationIdentifier, organizationData);
             this._organizations[organizationIdentifier] = organization;
         }
 
         this.setActiveOrganization(initialOrganizationId);
+    }
+
+    /**
+     * Return IDs and names of all `Organization`s
+     *
+     * @for OrganizationCollection
+     * @method getAllOrganizationIdsAndNames
+     * @returns {array<Object>}
+     */
+    getAllOrganizationIdsAndNames() {
+        const organizationData = [];
+
+        for (const id in this._organizations) {
+            const organization = this._organizations[id];
+
+            organizationData.push({ id: organization.id, name: organization.name });
+        }
+
+        return organizationData;
     }
 
     /**

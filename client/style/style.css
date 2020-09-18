@@ -10,19 +10,19 @@ body {
     font-weight: normal;
 }
 
-#svp-center-sectors td {
+#svp-center-table td {
     padding: .1rem .3rem;
     text-align: center;
     border: 1px solid #dee2e6;
 }
 
-#svp-other-facilities td {
+#svp-other-facilities-table td {
     padding: .1rem .3rem;
     text-align: center;
     border: 1px solid #dee2e6;
 }
 
-#svp-key-airports td {
+#svp-key-airports-table td {
     padding: .1rem .3rem;
     text-align: center;
     border: 1px solid #dee2e6;

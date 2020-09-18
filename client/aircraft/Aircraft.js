@@ -84,7 +84,7 @@ export default class Aircraft {
         const speed = this.groundSpeed;
         const distance = `${this.route.getFullRouteLength()} nm`;
         const distanceLink = `<a href="${url}" target="_blank">${distance}</a>`;
-        const eta = this.eta.toUTCString();
+        const eta = this.eta ? this.eta.toUTCString() : '????';
 
         const html = `<tr><td>${callsign}</td><td>${type}</td><td>${origin}</td>` +
             // `<td>${this.destination}</td><td>${this.altitude}</td><td>${this.groundSpeed}</td></tr>`;

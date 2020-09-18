@@ -5,15 +5,16 @@ import TimeStampView from './views/TimeStampView.js';
 import OrganizationCollection from './organization/OrganizationCollection.js';
 import ViewController from './views/ViewController.js';
 
-const initialOrganizationId = 'ZMA';
+const initialOrganizationId = 'DCC';
+let latestHttpResponse = null;
 const organizationCollection = new OrganizationCollection(initialOrganizationId);
 const aircraftCollection = new AircraftCollection(organizationCollection);
-const viewController = new ViewController(aircraftCollection, organizationCollection.activeOrganization);
+const viewController = new ViewController(aircraftCollection, organizationCollection);
 const timeStampView = new TimeStampView();
 const clockView = new ClockView();
 
 function getAircraftToShow() {
-    return aircraftCollection.filterByDestinationGroup('ZMA');
+    return aircraftCollection.filterByDestinationGroup(organizationCollection.activeOrganization.id);
 }
 
 function renderVatsimData() {
@@ -27,20 +28,27 @@ function renderVatsimData() {
 }
 
 function processNewVatsimData(httpResponse) {
-    const timeOfData = httpResponse.metaData.updateTime;
+    if (httpResponse) {
+        latestHttpResponse = httpResponse;
+    }
+
+    const timeOfData = latestHttpResponse.metaData.updateTime;
     const lastUpdateTime = aircraftCollection.updateTime;
 
-    if (timeOfData === lastUpdateTime) {
+    if (timeOfData === lastUpdateTime && httpResponse) {
         console.log(`Attempted to fetch new data, but "${lastUpdateTime}" is the latest data available.`);
 
         return;
     }
 
-    aircraftCollection.updateCollection(httpResponse);
+    aircraftCollection.updateCollection(latestHttpResponse);
     organizationCollection.activeOrganization.updateSectorTimeTables(aircraftCollection);
     organizationCollection.activeOrganization.updateKeyAirportArrivals(aircraftCollection);
     renderVatsimData();
 }
+
+// TODO: This is SO ICKY! Find another way.
+viewController._processNewVatsimData = processNewVatsimData;
 
 function getUpdatedData() {
     // ask server for fresh traffic data
