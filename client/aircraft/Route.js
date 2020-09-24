@@ -11,39 +11,136 @@ import { MAX_TURN_ANGLE_BEFORE_SKIPPING_FIX_DEG } from '../constants/routeConsta
 import { TIME } from '../../globalConstants.js';
 import { FIXES_TO_IGNORE } from '../constants/clientConstants.js';
 
+/**
+ * A representation of the filed flight plan route of a given `Aircraft`
+ *
+ * @class Route
+ */
 export default class Route {
     constructor(data) {
+        /**
+         * The ICAO identifier of the origin airport, if one exists
+         *
+         * @for Route
+         * @property _origin
+         * @type {string}
+         * @private
+         */
         this._origin = data.origin;
+
+        /**
+         * The ICAO identifier of the destination airport, if one exists
+         *
+         * @for Route
+         * @property _destination
+         * @type {string}
+         * @private
+         */
         this._destination = data.destination;
+
+        /**
+         * The current ground speed (in knots) of the `Aircraft` this `Route` belongs to
+         *
+         * @for Route
+         * @property _groundSpeedOfAircraft
+         * @type {number} - speed, in knots
+         * @private
+         */
         this._groundSpeedOfAircraft = data.groundSpeed;
+
+        /**
+         * Textual representation of the route, including ALL elements in their filed flight plan,
+         * regardless of which elements for which we are actually able to look up a location
+         *
+         * @for Route
+         * @property _routeString
+         * @type {string}
+         * @private
+         */
         this._routeString = data.routeString.trim();
+
+        /**
+         * A Turf.js `lineString` object, containing points at all recognized (and interpolated) waypoints
+         *
+         * @for Route
+         * @property _turfLineString
+         * @type {turf.lineString}
+         * @private
+         */
         this._turfLineString = null;
+
+        /**
+         * A JS Date object representing the time VATSIM captured the network data we are updating with
+         *
+         * @for Route
+         * @property _updateTime
+         * @type {Date}
+         * @private
+         */
         this._updateTime = data.updateTime;
+
+        /**
+         * Array of `Waypoint`s, ordered from beginning to end of the route, including interpolated waypoints
+         *
+         * @for Route
+         * @property _waypoints
+         * @type {array<Waypoint>}
+         * @private
+         */
         this._waypoints = [];
 
         this._init(data);
     }
 
+    /**
+     * Time the aircraft is projected to arrive at the last fix in the route
+     *
+     * @for Route
+     * @property eta
+     * @type {Date}
+     */
     get eta() {
         return _last(this._waypoints).time;
     }
 
     /**
-     * The Turf.js `LineString` instance associated with this waypoint's geographic location
+     * A Turf.js `lineString` object, containing points at all recognized (and interpolated) waypoints
      *
      * @for Route
      * @property turfLineString
-     * @type {LineString}
+     * @type {turf.lineString}
      */
     get turfLineString() {
         return this._turfLineString;
     }
 
+    /* ----------------------------- LIFECYCLE ----------------------------- */
+
+    /**
+     * Initialize the instance
+     *
+     * @for Route
+     * @method _init
+     * @param {object} data
+     * @returns {undefined}
+     * @private
+     */
     _init(data) {
         this._initWaypoints(data);
         this._updateTurfLineStringFromWaypoints();
     }
 
+    /**
+     * Initialize the waypoints on the route
+     *
+     * @for Route
+     * @method _initWaypoints
+     * @param {object} - in the shape of { aircraftPosition, organizationCollection }, where...
+     *                   aircraftPosition {object} = { lat: 41.176208, lon: -83.622404 }
+     *                   organizationCollection {OrganizationCollection}
+     * @returns {undefined}
+     * @private
+     */
     _initWaypoints({ aircraftPosition, organizationCollection }) {
         const originAirport = NavigationLibrary.getAirportWithIcao(this._origin);
 
@@ -83,6 +180,14 @@ export default class Route {
         this._initWaypointTimes(); // calculate time estimates over all fixes (including prior ones)
     }
 
+    /**
+     * Populate `Waypoint.distanceFromPreviousWaypoint` data for each `Waypoint` in this `Route`
+     *
+     * @for Route
+     * @method _initWaypointDistances
+     * @returns {undefined}
+     * @private
+     */
     _initWaypointDistances() {
         if (this._waypoints.length === 0) {
             return;
@@ -99,6 +204,14 @@ export default class Route {
         }
     }
 
+    /**
+     * Populate `Waypoint.headingToNextWaypoint` data for each `Waypoint` in this `Route`
+     *
+     * @for Route
+     * @method _initWaypointHeadings
+     * @returns {undefined}
+     * @private
+     */
     _initWaypointHeadings() {
         if (this._waypoints.length === 0) {
             return;
@@ -161,6 +274,23 @@ export default class Route {
         }
     }
 
+    /* ----------------------------- PUBLIC ----------------------------- */
+
+    /**
+     * Return the cumulative total distance along the `Route`, from first to last `Waypoint`
+     *
+     * @for Route
+     * @method getFullRouteLength
+     * @returns {number} - distance, in nautical miles
+     */
+    getFullRouteLength() {
+        const totalDistance = this._waypoints.reduce((totalDistance, wp) => {
+            return totalDistance + wp.distanceFromPreviousWaypoint;
+        }, 0);
+
+        return Math.round(totalDistance);
+    }
+
     /**
      * Return an array of all `Waypoint`s in this `Route` which mark an entry or exit of a `Sector`
      *
@@ -172,21 +302,7 @@ export default class Route {
         return this._waypoints.filter((wp) => wp.sectorChange.enter.length > 0 || wp.sectorChange.exit.length > 0);
     }
 
-    // _filterWaypointsToUniquePositions(waypoints) {
-    //     const uniquePositionWaypoints = [];
-
-    //     for (const waypoint of waypoints) {
-    //         const alreadyExists = uniquePositionWaypoints.some((wp) => wp.isCollocatedWithWaypoint(waypoint));
-
-    //         if (alreadyExists) {
-    //             continue;
-    //         }
-
-    //         uniquePositionWaypoints.push(waypoint);
-    //     }
-
-    //     return uniquePositionWaypoints;
-    // }
+    /* ----------------------------- PRIVATE ----------------------------- */
 
     /**
      * Read the `Waypoint.sectorBoundaries` data and apply the appropriate content to `Waypoint.sectorChange`
@@ -194,7 +310,7 @@ export default class Route {
      * @for Route
      * @method _generateSectorEntryExitData
      * @param organizationCollection {OrganizationCollection}
-     * @returns undefined
+     * @returns {undefined}
      * @private
      */
     _generateSectorEntryExitData(organizationCollection) {
@@ -308,7 +424,8 @@ export default class Route {
      *
      * @for Route
      * @method _getUnexitedSectors
-     * @return {array<Sector>}
+     * @returns {array<Sector>}
+     * @private
      */
     _getUnexitedSectors() {
         const sectors = [];
@@ -342,7 +459,7 @@ export default class Route {
      * @for Route
      * @method _insertCurrentPosition
      * @param {object} aircraftPosition - { lat: 40, lon: -77 }
-     * @returns undefined
+     * @returns {undefined}
      * @private
      */
     _insertCurrentPosition(aircraftPosition) {
@@ -352,116 +469,14 @@ export default class Route {
         this._insertWaypoint(aircraftPositionWaypoint);
     }
 
-    _insertSectorBoundaryWaypoints(organizationCollection) {
-        this._updateTurfLineStringFromWaypoints();
-
-        for (let i = 0; i < this._waypoints.length - 1; i++) {
-            const waypoint = this._waypoints[i];
-            const nextWaypoint = this._waypoints[i + 1];
-            const turfLineString = lineString([waypoint.coordinatesLonLat, nextWaypoint.coordinatesLonLat]);
-            const boundaryWaypoints = organizationCollection.getSectorBoundaryCrossingWaypoints(turfLineString);
-
-            if (boundaryWaypoints.length === 0) {
-                continue;
-            }
-
-            boundaryWaypoints.sort((wpA, wpB) => {
-                const distanceToWpA = distance(waypoint.turfPoint, wpA.turfPoint);
-                const distanceToWpB = distance(waypoint.turfPoint, wpB.turfPoint);
-
-                return distanceToWpA - distanceToWpB;
-            });
-
-            // combine back-to-back waypoints for exiting one sector and entering another at the same location
-            for (let j = 0; j < boundaryWaypoints.length - 1; j++) {
-                const thisIndexWp = boundaryWaypoints[j];
-                const nextIndexWp = boundaryWaypoints[j + 1];
-
-                if (thisIndexWp.isCollocatedWithWaypoint(nextIndexWp)) { // if collocated, merge waypoint sector poly data
-                    thisIndexWp.sectorBoundaryPolygons.push(...nextIndexWp.sectorBoundaryPolygons);
-                    boundaryWaypoints.splice(j + 1, 1);
-                }
-            }
-
-            this._waypoints.splice(i + 1, 0, ...boundaryWaypoints);
-
-            i += boundaryWaypoints.length;
-        }
-
-        this._generateSectorEntryExitData(organizationCollection);
-    }
-
-    /**
-     * Remove any `Waypoint`s from `this._waypoints` whose `icao` properties are identical, skipping interpolated fixes
-     * Priority of survival is given to `Airport` elements over `Fix` elements.
-     *
-     * This is useful for ignoring when people put their origin
-     * airport in the origin field AND as the first route element:
-     *     KMIA KMIA HEDLY2 HEDLY PHK BAIRN4 KMCO KMCO
-     *  --->    KMIA HEDLY2 HEDLY PHK BAIRN4 KMCO
-     *
-     * @for Route
-     * @method _removeDuplicateNonInterpolatedFixes
-     * @returns undefined
-     */
-    _removeDuplicateNonInterpolatedFixes() {
-        // iterate from first waypoint to second-to-last waypoint, comparing each with the NEXT
-        for (let i = 0; i < this._waypoints.length - 1; i++) {
-            const waypoint = this._waypoints[i];
-            const nextWaypoint = this._waypoints[i + 1];
-
-            // theoretically, there shouldn't even be any GPS waypoints yet; keeping anyway for defensiveness
-            if (waypoint.isGps() || nextWaypoint.isGps()) { // if either waypoint is a GPS waypoint
-                continue;
-            }
-
-            if (waypoint.icao !== nextWaypoint.icao) { // if both have ICAO identifiers, and they are different
-                continue;
-            }
-
-            if (waypoint.isAirport()) { // if the current waypoint is an airport
-                this._waypoints.splice(i + 1, 1); // remove the next waypoint
-
-                continue;
-            }
-
-            if (nextWaypoint.isAirport()) { // if the next waypoint is an airport
-                this._waypoints.splice(i, 1); // remove the current waypoint
-
-                continue;
-            }
-
-            this._waypoints.splice(i + 1, 1); // if neither is an airport, remove the next waypoint
-        }
-    }
-
-    _updateTurfLineStringFromWaypoints() {
-        if (this._waypoints.length < 2) {
-            console.warn('Expected multiple waypoints to be recognized, but the route has only ' +
-                `${this._waypoints.length} known positions!`);
-
-            return;
-        }
-
-        const coordinates = this._waypoints.map((wp) => wp.turfPoint.geometry.coordinates);
-        this._turfLineString = lineString(coordinates, { routeString: this._routeString });
-    }
-
-    getFullRouteLength() {
-        const totalDistance = this._waypoints.reduce((totalDistance, wp) => {
-            return totalDistance + wp.distanceFromPreviousWaypoint;
-        }, 0);
-
-        return Math.round(totalDistance);
-    }
-
     /**
      * Insert the provided waypoint into the `Route` at the appropriate position
      *
      * @for Route
      * @method _insertWaypoint
      * @param {Waypoint} proposedWaypoint
-     * @returns undefined
+     * @returns {undefined}
+     * @private
      */
     _insertWaypoint(proposedWaypoint) {
         // this._updateTurfLineStringFromWaypoints();
@@ -561,9 +576,137 @@ export default class Route {
         this._waypoints.splice(insertionIndex, 0, proposedWaypoint);
     }
 
+    /**
+     * Insert each of the `Waypoint`s in the provided array into the `Route` at the appropriate position
+     *
+     * @for Route
+     * @method _insertWaypoints
+     * @param {array<Waypoint>} waypoints
+     * @returns {undefined}
+     * @private
+     */
     _insertWaypoints(waypoints) {
         for (const waypoint of waypoints) {
             this._insertWaypoint(waypoint);
         }
+    }
+
+    /**
+     * Iterate through each waypoint-to-waypoint leg of the route, checking each leg for point(s) where
+     * the route crosses a sector boundary, and adding waypoints at those locations with information
+     * stored in that waypoint which describes the sector which was being entered/exited
+     *
+     * @for Route
+     * @method _insertSectorBoundaryWaypoints
+     * @param {OrganizationCollection} organizationCollection
+     * @returns {undefined}
+     * @private
+     */
+    _insertSectorBoundaryWaypoints(organizationCollection) {
+        this._updateTurfLineStringFromWaypoints();
+
+        for (let i = 0; i < this._waypoints.length - 1; i++) {
+            const waypoint = this._waypoints[i];
+            const nextWaypoint = this._waypoints[i + 1];
+            const turfLineString = lineString([waypoint.coordinatesLonLat, nextWaypoint.coordinatesLonLat]);
+            const boundaryWaypoints = organizationCollection.getSectorBoundaryCrossingWaypoints(turfLineString);
+
+            if (boundaryWaypoints.length === 0) {
+                continue;
+            }
+
+            boundaryWaypoints.sort((wpA, wpB) => {
+                const distanceToWpA = distance(waypoint.turfPoint, wpA.turfPoint);
+                const distanceToWpB = distance(waypoint.turfPoint, wpB.turfPoint);
+
+                return distanceToWpA - distanceToWpB;
+            });
+
+            // combine back-to-back waypoints for exiting one sector and entering another at the same location
+            for (let j = 0; j < boundaryWaypoints.length - 1; j++) {
+                const thisIndexWp = boundaryWaypoints[j];
+                const nextIndexWp = boundaryWaypoints[j + 1];
+
+                if (thisIndexWp.isCollocatedWithWaypoint(nextIndexWp)) { // if collocated, merge waypoint sector poly data
+                    thisIndexWp.sectorBoundaryPolygons.push(...nextIndexWp.sectorBoundaryPolygons);
+                    boundaryWaypoints.splice(j + 1, 1);
+                }
+            }
+
+            this._waypoints.splice(i + 1, 0, ...boundaryWaypoints);
+
+            i += boundaryWaypoints.length;
+        }
+
+        this._generateSectorEntryExitData(organizationCollection);
+    }
+
+    /**
+     * Remove any `Waypoint`s from `this._waypoints` whose `icao` properties are identical, skipping interpolated fixes
+     * Priority of survival is given to `Airport` elements over `Fix` elements.
+     *
+     * This is useful for ignoring when people put their origin
+     * airport in the origin field AND as the first route element:
+     *     KMIA KMIA HEDLY2 HEDLY PHK BAIRN4 KMCO KMCO
+     *  --->    KMIA HEDLY2 HEDLY PHK BAIRN4 KMCO
+     *
+     * @for Route
+     * @method _removeDuplicateNonInterpolatedFixes
+     * @returns {undefined}
+     * @private
+     */
+    _removeDuplicateNonInterpolatedFixes() {
+        // iterate from first waypoint to second-to-last waypoint, comparing each with the NEXT
+        for (let i = 0; i < this._waypoints.length - 1; i++) {
+            const waypoint = this._waypoints[i];
+            const nextWaypoint = this._waypoints[i + 1];
+
+            // theoretically, there shouldn't even be any GPS waypoints yet; keeping anyway for defensiveness
+            if (waypoint.isGps() || nextWaypoint.isGps()) { // if either waypoint is a GPS waypoint
+                continue;
+            }
+
+            if (waypoint.icao !== nextWaypoint.icao) { // if both have ICAO identifiers, and they are different
+                continue;
+            }
+
+            if (waypoint.isAirport()) { // if the current waypoint is an airport
+                this._waypoints.splice(i + 1, 1); // remove the next waypoint
+
+                continue;
+            }
+
+            if (nextWaypoint.isAirport()) { // if the next waypoint is an airport
+                this._waypoints.splice(i, 1); // remove the current waypoint
+
+                continue;
+            }
+
+            this._waypoints.splice(i + 1, 1); // if neither is an airport, remove the next waypoint
+        }
+    }
+
+    /**
+     * Regenerate the `_turfLineString` from all `Waypoint`s in the `Route`
+     *
+     * For example, we would want to do this after adding a series of interpolated waypoints, so
+     * that the route points displayed in the situation display can offer contextual information on
+     * each position along the aircraft's route which could be relevant to the user
+     *
+     * @for Route
+     * @method _updateTurfLineStringFromWaypoints
+     * @returns {undefined}
+     * @private
+     */
+    _updateTurfLineStringFromWaypoints() {
+        if (this._waypoints.length < 2) {
+            console.warn('Expected multiple waypoints to be recognized, but the route has only ' +
+                `${this._waypoints.length} known positions!`);
+
+            return;
+        }
+
+        const coordinates = this._waypoints.map((wp) => wp.turfPoint.geometry.coordinates);
+        this._turfLineString = lineString(coordinates, { routeString: this._routeString });
     }
 }

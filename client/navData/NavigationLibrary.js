@@ -37,7 +37,7 @@ class NavigationLibrary {
      *
      * @for NavigationLibrary
      * @method _initFixes
-     * @returns undefined
+     * @returns {undefined}
      */
     _initFixes() {
         const nextFixList = {};

@@ -57,7 +57,7 @@ export default class ViewController {
      *
      * @for ViewController
      * @method _initFacilityDropDownLinks
-     * @returns undefined
+     * @returns {undefined}
      */
     _initFacilityDropDownLinks() {
         const elements = this._getAllNavLinkElements();

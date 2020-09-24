@@ -132,7 +132,7 @@ export default class SectorVolumePageView {
      *
      * @for SectorVolumePageView
      * @method _regenerateIntervals
-     * @returns undefined
+     * @returns {undefined}
      */
     _regenerateIntervals() {
         let nextHour = new Date();

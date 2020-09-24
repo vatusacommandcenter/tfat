@@ -1,5 +1,10 @@
 import Route from './Route.js';
 
+/**
+ * Representation of each aircraft received in VATSIM network data
+ *
+ * @class Aircraft
+ */
 export default class Aircraft {
     /**
      * @for Aircraft
@@ -11,25 +16,15 @@ export default class Aircraft {
             this[key] = aircraftData[key];
         }
 
+        /**
+         * The `Route` this `Aircraft` has filed, including their current position
+         *
+         * @for Aircraft
+         * @property {Route} route
+         */
         this.route = null;
 
         this._init(updateTime, organizationCollection);
-    }
-
-    get eta() {
-        return this.route.eta;
-    }
-
-    _init(updateTime, organizationCollection) {
-        this.route = new Route({
-            aircraftPosition: this.position,
-            destination: this.destination,
-            groundSpeed: this.groundSpeed,
-            organizationCollection,
-            origin: this.fpOrigin,
-            routeString: this.fpRoute,
-            updateTime
-        });
     }
 
     /**
@@ -51,6 +46,17 @@ export default class Aircraft {
     }
 
     /**
+     *
+     *
+     *
+     * @for Aircraft
+     * @property {Date} eta
+     */
+    get eta() {
+        return this.route.eta;
+    }
+
+    /**
      * Position of this aircraft, specified in `{lat: 41.7, lon: -80.2}` format
      * For the position in `[lon, lat]` format, use `.coordinatesLonLat`
      *
@@ -63,11 +69,30 @@ export default class Aircraft {
     }
 
     /**
+     * Initialize the instance
+     *
+     * @for Aircraft
+     * @method _init
+     * @private
+     */
+    _init(updateTime, organizationCollection) {
+        this.route = new Route({
+            aircraftPosition: this.position,
+            destination: this.destination,
+            groundSpeed: this.groundSpeed,
+            organizationCollection,
+            origin: this.fpOrigin,
+            routeString: this.fpRoute,
+            updateTime
+        });
+    }
+
+    /**
      * Return html table row data for the entry for `this` Aircraft
      *
      * @for Aircraft
      * @method getTableRowHtml
-     * @return {string} - can be directly used with .innerHtml() to create a table row
+     * @returns {string} - can be directly used with .innerHtml() to create a table row
      */
     getTableRowHtml() {
         // https://skyvector.com/?ll=30,-80&chart=302&zoom=14&fpl=%20KMIA%20HEDLY2%20HEDLY%20PHK%20ORL%20LAIRI%20LARZZ%20KATL

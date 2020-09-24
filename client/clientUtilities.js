@@ -17,7 +17,7 @@ import bearing from '@turf/bearing';
  * @function mod
  * @param firstValue {number} - value to be divided
  * @param secondValue {number} - value to divide by
- * @return {number}
+ * @returns {number}
  */
 export function mod(firstValue, secondValue) {
     return ((firstValue % secondValue) + secondValue) % secondValue;
@@ -31,7 +31,7 @@ export function mod(firstValue, secondValue) {
  * @function calculateAngleDifference
  * @param {number} finalAngle - heading, in degrees, to subtract from, within range [0, 360]
  * @param {number} initialAngle - heading, in degrees, to be subtracted, within range [0, 360]
- * @return {number} - angle between the two headings, signed to show direction to apply from `initialAngle`, within [-180, 180)
+ * @returns {number} - angle between the two headings, signed to show direction to apply from `initialAngle`, within [-180, 180)
  */
 export function calculateAngleDifference(finalAngle, initialAngle) {
     let invert = false;
@@ -61,8 +61,8 @@ export function calculateAngleDifference(finalAngle, initialAngle) {
  * Helper function to call Turf.js's `distance()` function and convert its km output to nautical miles
  *
  * @function distanceNm
- * @param {turf.Point} point1
- * @param {turf.Point} point2
+ * @param {turf.point} point1
+ * @param {turf.point} point2
  * @returns {number} - distance in nautical miles
  */
 export function distanceNm(point1, point2) {
@@ -80,8 +80,8 @@ export function distanceNm(point1, point2) {
  * Helper function to call Turf.js's `bearing()` function and convert its [-180, 180] output to [0, 360]
  *
  * @function bearing360
- * @param {turf.Point} point1
- * @param {turf.Point} point2
+ * @param {turf.point} point1
+ * @param {turf.point} point2
  * @returns {number} - bearing in decimal degrees between [0, 360]
  */
 export function bearing360(point1, point2) {

@@ -129,7 +129,7 @@ export default class Organization {
      *
      * @for Organization
      * @method getSectorsFromTurfPoint
-     * @param {turf.Point} turfPoint
+     * @param {turf.point} turfPoint
      * @returns {array<Sector>}
      */
     getSectorsFromTurfPoint(turfPoint) {
@@ -148,7 +148,7 @@ export default class Organization {
      * @for Organization
      * @method updateSectorTimeTables
      * @param aircraftCollection {AircraftCollection}
-     * @returns undefined
+     * @returns {undefined}
      */
     updateSectorTimeTables(aircraftCollection) {
         for (const facilityId in this.facilities) {
@@ -162,7 +162,7 @@ export default class Organization {
      * @for Organization
      * @method updateKeyAirportArrivals
      * @param {AircraftCollection} aircraftCollection
-     * @returns undefined
+     * @returns {undefined}
      */
     updateKeyAirportArrivals(aircraftCollection) {
         const airportArrivals = {};

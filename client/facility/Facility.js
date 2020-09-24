@@ -79,7 +79,7 @@ export default class Facility {
      *
      * @for Facility
      * @method combineAllSectorsToDefault
-     * @returns undefined
+     * @returns {undefined}
      */
     combineAllSectorsToDefault() {
         const allSectors = this._sectorCollection.sectors;
@@ -95,7 +95,7 @@ export default class Facility {
      * @method combineSectorTo
      * @param {Sector} sectorBeingAbsorbed
      * @param {Sector} absorbingSector
-     * @returns undefined
+     * @returns {undefined}
      */
     combineSectorTo(sectorBeingAbsorbed, absorbingSector) {
         this.decombineSector(sectorBeingAbsorbed);
@@ -114,7 +114,7 @@ export default class Facility {
      * @method combineSectorsTo
      * @param {array<Sector>} sectorsBeingAbsorbed
      * @param {Sector} absorbingSector
-     * @return undefined
+     * @returns {undefined}
      */
     combineSectorsTo(sectorsBeingAbsorbed, absorbingSector) {
         for (const sector of sectorsBeingAbsorbed) {
@@ -128,7 +128,7 @@ export default class Facility {
      * @for Facility
      * @method decombineSector
      * @param {Sector} sector
-     * @returns undefined
+     * @returns {undefined}
      */
     decombineSector(sector) {
         for (const otherSector of this._sectorCollection.sectors) {
@@ -154,7 +154,7 @@ export default class Facility {
      *
      * @for Facility
      * @method getSectorsFromTurfPoint
-     * @param {turf.Point} turfPoint
+     * @param {turf.point} turfPoint
      * @returns {array<Sector>}
      */
     getSectorsFromTurfPoint(turfPoint) {
@@ -171,7 +171,7 @@ export default class Facility {
      * @for Facility
      * @method updateSectorTimeTables
      * @param aircraftCollection {AircraftCollection}
-     * @returns undefined
+     * @returns {undefined}
      */
     updateSectorTimeTables(aircraftCollection) {
         this._sectorCollection.updateSectorTimeTables(aircraftCollection);

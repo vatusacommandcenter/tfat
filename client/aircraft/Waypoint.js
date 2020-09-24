@@ -4,7 +4,7 @@ import Fix from '../navData/Fix.js';
 import { WAYPOINT_TYPES } from '../constants/routeConstants.js';
 
 /**
- * Location along the aircraft's route
+ * Location along the `Route` of a particular `Aircraft`
  *
  * This may represent an airport, fix, navaid, or interpolated point used to represent the position
  * where the aircraft enters/exits a certain area of airspace, etc
@@ -25,7 +25,7 @@ export default class Waypoint {
          *
          * @for Waypoint
          * @property sectorBoundaryPolygons
-         * @type {array<turf.Polygon>}
+         * @type {array<turf.polygon>}
          */
         this.sectorBoundaryPolygons = [];
 
@@ -126,7 +126,7 @@ export default class Waypoint {
      * @for Waypoint
      * @method _initAsAirport
      * @param {Airport} airport
-     * @returns undefined
+     * @returns {undefined}
      */
     _initAsAirport(airport) {
         this._navDataRef = airport;
@@ -141,7 +141,7 @@ export default class Waypoint {
      * @for Waypoint
      * @method _initAsFix
      * @param {Fix} fix
-     * @returns undefined
+     * @returns {undefined}
      */
     _initAsFix(fix) {
         this._navDataRef = fix;
@@ -156,7 +156,7 @@ export default class Waypoint {
      * @for Waypoint
      * @method _initAsGps
      * @param {*} data - {lat, lon, (poly) }, where `poly` is optional
-     * @returns undefined
+     * @returns {undefined}
      */
     _initAsGps(data) {
         this._navDataRef = null;

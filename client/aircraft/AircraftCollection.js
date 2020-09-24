@@ -2,6 +2,11 @@ import Aircraft from './Aircraft.js';
 import { DESTINATION_GROUP } from '../constants/clientConstants.js';
 import { generateDateFromVatsimTimestamp } from '../../server/serverUtilities.js';
 
+/**
+ * A collection of multiple `Aircraft`
+ *
+ * @class AircraftCollection
+ */
 export default class AircraftCollection {
     /**
      * Constructor for `AircraftCollection`
@@ -17,7 +22,6 @@ export default class AircraftCollection {
          * @for AircraftCollection
          * @property _list
          * @type <array<Aircraft>>
-         * @default []
          * @private
          */
         this._list = [];
@@ -50,6 +54,7 @@ export default class AircraftCollection {
              * @memberof _metaData
              * @property updateTimeObj
              * @type {Date}
+             * @private
              */
             updateTimeObj: null,
 
@@ -76,15 +81,37 @@ export default class AircraftCollection {
             totalConnections: 0
         };
 
+        /**
+         * Local reference to the `OrganizationCollection`, used to generate sector boundary waypoints
+         *
+         * @for AircraftCollection
+         * @property _organizationCollection
+         * @type {organizationCollection}
+         * @private
+         */
         this._organizationCollection = organizationCollection;
 
         return this;
     }
 
+    /**
+     * Number of `Aircraft` in the collection
+     *
+     * @for AircraftCollection
+     * @property length
+     * @type {number}
+     */
     get length() {
         return this._list.length;
     }
 
+    /**
+     * Array of `Aircraft` in the collection
+     *
+     * @for AircraftCollection
+     * @property list
+     * @type {array<Aircraft>}
+     */
     get list() {
         return this._list;
     }
@@ -115,6 +142,7 @@ export default class AircraftCollection {
      * Return an `AircraftCollection` including all `Aircraft` landing at the specified destination
      *
      * @for AircraftCollection
+     * @method filterByDestination
      * @param {string} destination - ICAO identifier of the destination airport to filter by
      * @returns {AircraftCollection}
      */
@@ -131,6 +159,7 @@ export default class AircraftCollection {
      * Return an `AircraftCollection` including all `Aircraft` landing at any of the specified destinations
      *
      * @for AircraftCollection
+     * @method filterByDestination
      * @param {array<string>} destinationList - array of ICAO identifiers of the destination airports to filter by
      * @returns {AircraftCollection}
      */
@@ -153,6 +182,7 @@ export default class AircraftCollection {
      * destination included within the specified destination group
      *
      * @for AircraftCollection
+     * @method filterByDestinationGroup
      * @param {string} destination - name of the destination group to filter by, from `DESTINATION_GROUP`
      * @returns {AircraftCollection}
      */
@@ -177,8 +207,8 @@ export default class AircraftCollection {
      *
      * @for AircraftCollection
      * @method generateNewCollectionWithAircraft
-     * @param {array<Aircraft>} aircraftList - An array of `Aircraft` instances (NOT
-     *      VATSIM DATA!) from which to form a new `AircraftCollection`
+     * @param {array<Aircraft>} aircraftList - An array of `Aircraft` instances (NOT VATSIM DATA!) from
+     *                                         which to form a new `AircraftCollection`
      * @returns {AircraftCollection}
      */
     generateNewCollectionWithAircraft(aircraftList) {
@@ -215,7 +245,7 @@ export default class AircraftCollection {
      *
      * @for AircraftCollection
      * @method getTableBodyHTML
-     * @return {string} - can be directly used with .innerHtml() to create a table body
+     * @returns {string} - can be directly used with .innerHtml() to create a table body
      */
     getTableBodyHTML() {
         const tableRows = this._list.map((ac) => ac.getTableRowHtml());
@@ -246,8 +276,10 @@ export default class AircraftCollection {
      *
      * @for AircraftCollection
      * @method updateCollection
-     * @param {array<object>} downloadedData - raw download data from the server (NOT `Aircraft` INSTANCES!)
-     * @param {object} metaData - information on the latest download (generated time, connection counts, etc)
+     * @param {object} - in the shape of `{ downloadedData, metaData }`, where...
+     *                   downloadedData `{array<object>}` - raw download data from the server (NOT `Aircraft` INSTANCES!)
+     *                   metaData `{object}` - information on the latest download (generated time, connection counts, etc)
+     * @returns {undefined}
      */
     updateCollection({ data: downloadedData, metaData }) {
         if (!Array.isArray(downloadedData) || downloadedData.length === 0) {

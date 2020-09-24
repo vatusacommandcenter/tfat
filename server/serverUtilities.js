@@ -31,7 +31,7 @@ export function generateDateFromVatsimTimestamp(timestamp) {
  * Initialize a recurring schedule to request traffic data from VATSIM repeatedly
  *
  * @function initializeDataRequestSchedule
- * @returns undefined
+ * @returns {undefined}
  */
 export function initializeDataRequestSchedule(updateLocalDataFunc, dataRequestIntervalMs) {
     setInterval(updateLocalDataFunc, dataRequestIntervalMs);
@@ -44,7 +44,7 @@ export function initializeDataRequestSchedule(updateLocalDataFunc, dataRequestIn
  * Note: This function will also get fresh traffic data from VATSIM at this time
  *
  * @function startVatsimDataUpdates
- * @returns undefined
+ * @returns {undefined}
  */
 export function startVatsimDataUpdates(updateLocalDataFunc, dataRequestIntervalMs, assumedSourceDataUpdateRateMs) {
     console.log(`first data fetch time: ${new Date().toUTCString()}`);

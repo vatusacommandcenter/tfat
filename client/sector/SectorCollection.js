@@ -30,7 +30,7 @@ export default class SectorCollection {
      *
      * @for SectorCollection
      * @method getSectorsFromTurfPoint
-     * @param {turf.Point} turfPoint
+     * @param {turf.point} turfPoint
      * @returns {array<Sector>}
      */
     getSectorsFromTurfPoint(turfPoint) {
@@ -43,7 +43,7 @@ export default class SectorCollection {
      * @for SectorCollection
      * @method getSectorWithId
      * @param {string} sectorId
-     * @return {Sector}
+     * @returns {Sector}
      */
     getSectorWithId(sectorId) {
         const sector = this._sectors.find((sector) => sector.id === String(sectorId));
@@ -85,7 +85,7 @@ export default class SectorCollection {
      * @for SectorCollection
      * @method updateSectorTimeTables
      * @param aircraftCollection {AircraftCollection}
-     * @returns undefined
+     * @returns {undefined}
      */
     updateSectorTimeTables(aircraftCollection) {
         const sectorChanges = aircraftCollection.getSectorChanges(); // [ { aircraft, waypoint } ]
@@ -153,7 +153,7 @@ export default class SectorCollection {
      *
      * @for SectorCollection
      * @method _clearAllSectorTimeTables
-     * @returns undefined
+     * @returns {undefined}
      * @private
      */
     _clearAllSectorTimeTables() {

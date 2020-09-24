@@ -73,7 +73,7 @@ export default class OrganizationCollection {
      *
      * @for OrganizationCollection
      * @method getSectorBoundaryCrossingWaypoints
-     * @param {turf.LineString} turfLineString
+     * @param {turf.lineString} turfLineString
      * @returns {array<Waypoint>}
      */
     getSectorBoundaryCrossingWaypoints(turfLineString) {
@@ -85,7 +85,7 @@ export default class OrganizationCollection {
      *
      * @for OrganizationCollection
      * @method getSectorsFromTurfPoint
-     * @param {turf.Point} turfPoint
+     * @param {turf.point} turfPoint
      * @returns {array<Sector>}
      */
     getSectorsFromTurfPoint(turfPoint) {

@@ -55,7 +55,7 @@ export default class Sector {
      * @for Sector
      * @method getIntersectionsWithTurfLineString
      * @param {turf.lineString} turfLineString
-     * @returns {array<object>} - [{ 'point': turf.Point, 'poly': turf.Polygon }, ...]
+     * @returns {array<object>} - [{ 'point': turf.point, 'poly': turf.polygon }, ...]
      */
     getIntersectionsWithTurfLineString(turfLineString) {
         const intersections = [];
@@ -84,7 +84,7 @@ export default class Sector {
      *
      * @for Sector
      * @method isTurfPointInAirspace
-     * @param {turf.Point} turfPoint
+     * @param {turf.point} turfPoint
      * @returns {boolean}
      */
     isTurfPointInAirspace(turfPoint) {
