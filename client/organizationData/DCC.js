@@ -1,8 +1,8 @@
 export const DCC = {
     organizationName: 'VATUSA ATC System Command Center',
-    keyAirports: ['KSTL', 'KMSP', 'KDEN', 'KDFW', 'KIAH', 'KMSY', 'KMEM', 'KBNA', 'KATL', 'KCLT', 'KCLE', 'KORD'],
+    keyAirports: ['KEWR', 'KLGA', 'KJFK', 'KBOS', 'KIAD', 'KDCA', 'KBWI', 'KPHL', 'KCLE', 'KORD'],
     airportGroups: {
-        DCC: ['KSTL', 'KMSP', 'KDEN', 'KDFW', 'KIAH', 'KMSY', 'KMEM', 'KBNA', 'KATL', 'KCLT', 'KCLE', 'KORD']
+        DCC: ['KEWR', 'KLGA', 'KJFK', 'KBOS', 'KIAD', 'KDCA', 'KBWI', 'KPHL', 'KCLE', 'KORD']
     },
     facilities: {
         center: {
