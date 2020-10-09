@@ -31,6 +31,14 @@ export const FIXES_TO_IGNORE = [
     'TO' // common in plain-english routes, assume they don't mean the TO NDB
 ];
 
+export const ROUTES_TO_REPLACE = {
+    SSCOT5: ['BAARY', 'CYY', 'DEEDS', 'SSCOT', 'RUBOE', 'WALIP'],
+    HILEY7: ['PBI', 'BTOGA', 'HILEY', 'KAINS', 'CIMBA', 'JESSS'],
+    CURSO5: ['DVALL', 'CURSO', 'MNNDY'],
+    JINGL6: ['RXXAN', 'FORTL', 'SWAGS', 'JINGL', 'JAREM', 'BEPAC'],
+    FISEL7: ['FATHR', 'TOOMR', 'JALOP', 'MOSIE', 'FISEL', 'WAKED', 'BEPAC']
+};
+
 /**
  * Interval (milliseconds) upon which the client will repeatedly request new pilot
  * data from the server

@@ -9,7 +9,7 @@ import { TURF_LENGTH_UNIT } from '../constants/turfConstants.js';
 import { calculateAngleDifference, distanceNm, bearing360 } from '../clientUtilities.js';
 import { MAX_TURN_ANGLE_BEFORE_SKIPPING_FIX_DEG } from '../constants/routeConstants.js';
 import { TIME } from '../../globalConstants.js';
-import { FIXES_TO_IGNORE } from '../constants/clientConstants.js';
+import { FIXES_TO_IGNORE, ROUTES_TO_REPLACE } from '../constants/clientConstants.js';
 
 /**
  * A representation of the filed flight plan route of a given `Aircraft`
@@ -405,6 +405,20 @@ export default class Route {
         for (const element of routeElements) {
             if (FIXES_TO_IGNORE.includes(element)) {
                 continue;
+            }
+
+            if (element in ROUTES_TO_REPLACE) {
+                const fixes = ROUTES_TO_REPLACE[element];
+
+                for (const fix of fixes) {
+                    const position = NavigationLibrary.getFixWithName(fix);
+
+                    if (typeof position === 'undefined') {
+                        continue;
+                    }
+
+                    waypoints.push(position);
+                }
             }
 
             const position = NavigationLibrary.getFixWithName(element);
