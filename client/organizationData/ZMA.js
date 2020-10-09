@@ -22,7 +22,7 @@ export const ZMA = {
             airspaceExclusionFacilities: ['MIA', 'TPA', 'PBI', 'RSW', 'NQX', 'F11'],
             facilityName: 'Miami Center',
             defaultSectorConfiguration: {
-                5: 46, 6: 46, 8: 46, 19: 46, 20: 46, 21: 46, 23: 46, 25: 46, 41: 46, 42: 46, 46: 46,
+                5: 8, 6: 8, 8: 8, 19: 19, 20: 20, 21: 19, 23: 20, 25: 25, 41: 41, 42: 41, 46: 46,
                 43: 62, 58: 62, 59: 62, 62: 62, 63: 62
             },
             sectors: {
