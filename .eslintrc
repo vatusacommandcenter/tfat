@@ -53,7 +53,8 @@
         {
          "files": ["client/organizationData/*.js"],
             "rules": {
-               "max-len": "off"
+               "max-len": "off",
+               "object-property-newline": "off"
             }
         }
     ]

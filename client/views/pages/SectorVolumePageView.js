@@ -49,10 +49,24 @@ export default class SectorVolumePageView {
     }
 
     _initCenterTimeTable() { // traffic data WILL NOT BE AVAILABLE YET, so build a template only
-        const sectors = this._organization.centerFacility.getAllSectors();
+        const openSectors = this._organization.centerFacility.getAllOpenSectors();
 
-        for (const sector of sectors) {
-            this._centerTimeTable.push([sector.id, ..._fill(Array(this._tableTotalIntervals), '-')]);
+        for (const sector of openSectors) {
+            if (!sector.hasSubSectors()) {
+                this._centerTimeTable.push([[sector.id, ..._fill(Array(this._tableTotalIntervals), '-')]]);
+
+                continue;
+            }
+
+            const displayedTimeTable = [`${sector.id}+`, ..._fill(Array(this._tableTotalIntervals), '-')];
+            const primarySectorTimeTable = [sector.id, ..._fill(Array(this._tableTotalIntervals), '-')];
+            const subSectorTimeTables = sector.subSectors.map((subSector) => {
+                return [subSector.id, ..._fill(Array(this._tableTotalIntervals), '-')];
+            });
+            const suppressibleTimeTables = [primarySectorTimeTable, ...subSectorTimeTables];
+            const sectorTimeTableIncludingSubsectors = [displayedTimeTable, ...suppressibleTimeTables];
+
+            this._centerTimeTable.push(sectorTimeTableIncludingSubsectors);
         }
 
         this._updateCenterTableElementFromCenterTimeTable();
@@ -195,14 +209,50 @@ export default class SectorVolumePageView {
 
     _updateCenterTableElementFromCenterTimeTable() {
         const intervalsHtml = this._getIntervalRowHtml();
-        const rowsHtml = this._centerTimeTable.map((sector) => `<tr><td>${sector.join('</td><td>')}</td></tr>`);
-        this.$centerSectorsElement.innerHTML = intervalsHtml + rowsHtml.join('');
+        const htmlPerOpenSector = this._centerTimeTable.map((openSectorWithSubSectors) => {
+            const displayedTimeTable = openSectorWithSubSectors[0];
+            const suppressibleTimeTables = [...openSectorWithSubSectors];
+            suppressibleTimeTables.shift(); // remove the displayed time table
+            const sectorLabel = `${this._organization.centerFacility.id}-${openSectorWithSubSectors[0][0].replace('+', '')}`;
+            const displayedBody = '<tbody><tr class="clickable" data-toggle="collapse" data-target="#subsectors-of-' +
+                `${sectorLabel}"><td>${displayedTimeTable.join('</td><td>')}</td></tr></tbody>`;
+            const suppressibleBody = `<tbody id="subsectors-of-${sectorLabel}" class="collapse subsectors">` +
+                `${suppressibleTimeTables.map((tt) => `<tr><td>${tt.join('</td><td>')}</td></tr>`).join('')}</tbody>`;
+            const html = `${displayedBody}${suppressibleBody}`;
+
+            return html;
+        });
+
+        this.$centerSectorsElement.innerHTML = intervalsHtml + htmlPerOpenSector.join('');
     }
 
     _updateCenterTimeTable() {
-        const sectors = this._organization.centerFacility.getAllSectors();
-        const timeTables = sectors.map((sector) => this._getTimeTableForSector(sector));
+        const sectors = this._organization.centerFacility.getAllOpenSectors();
+        const timeTables = sectors.map((sector) => this._getAllTimeTablesForSector(sector));
+
         this._centerTimeTable = timeTables;
+    }
+
+    /**
+     * Return time tables for the specified sector, and if it has subsectors, for all its subsectors as well
+     *
+     * @for SectorVolumePageView
+     * @method _getAllTimeTablesForSector
+     * @param {Sector} sector
+     * @returns {array<array<string>>}
+     */
+    _getAllTimeTablesForSector(sector) {
+        if (!sector.hasSubSectors()) {
+            return [this._getTimeTableForSector(sector)];
+        }
+
+        const displayedTimeTable = this._getRecursiveTimeTableForSector(sector);
+        const primarySectorTimeTable = this._getTimeTableForSector(sector);
+        const subSectorTimeTables = sector.subSectors.map((subSector) => this._getTimeTableForSector(subSector));
+        const suppressibleTimeTables = [primarySectorTimeTable, ...subSectorTimeTables];
+        const sectorTimeTableIncludingSubsectors = [displayedTimeTable, ...suppressibleTimeTables];
+
+        return sectorTimeTableIncludingSubsectors;
     }
 
     _getTimeTableForSector(sector) {
@@ -243,6 +293,22 @@ export default class SectorVolumePageView {
         console.log([sector.id, ...cellsInRow]);
 
         return [sector.id, ...rowCounts];
+    }
+
+    /**
+     * Return a time table for the specified sector where you combine all polygons of the sector AND SUBSECTORS
+     *
+     * @for SectorVolumePageView
+     * @method _getRecursiveTimeTableForSector
+     * @param {Sector} sector
+     * @return {array<string>}
+     */
+    _getRecursiveTimeTableForSector(sector) {
+        // FIXME: for now...
+        const timeTable = this._getTimeTableForSector(sector);
+        timeTable[0] += '+';
+
+        return timeTable;
     }
 
     _updateKeyAirportsTableElementFromKeyAirportTimeTable() {

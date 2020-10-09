@@ -27,3 +27,7 @@ body {
     text-align: center;
     border: 1px solid #dee2e6;
 }
+
+#svp-center-table tbody.subsectors {
+    color: #ccc;
+}

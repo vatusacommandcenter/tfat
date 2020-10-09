@@ -79,6 +79,17 @@ export default class Sector {
     }
 
     /**
+     * Returns whether this `Sector` has any subsectors combined to it
+     *
+     * @for Sector
+     * @method hasSubSectors
+     * @returns {boolean}
+     */
+    hasSubSectors() {
+        return this.subSectors.length > 0;
+    }
+
+    /**
      * Return whether or not the specified Turf.js Point is located within any
      * of this sector's airspace polygons
      *

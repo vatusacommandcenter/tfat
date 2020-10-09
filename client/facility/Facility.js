@@ -19,8 +19,15 @@ export default class Facility {
          */
         this._airspaceExlusionFacilities = [];
 
-        // TODO: Change me to _defaultSectorConfiguration, where we can combine ZMA-->46 and ZMO-->62
-        this._defaultSectorId = null;
+        /**
+         * Configuration of which sectors should be combined to which sectors on startup
+         *
+         * @for Facility
+         * @property _defaultSectorConfiguration
+         * @type {object}
+         * @private
+         */
+        this._defaultSectorConfiguration = null;
 
         /**
          * Written name of the facility (ie 'Miami Center')
@@ -67,25 +74,40 @@ export default class Facility {
         }
 
         this._airspaceExlusionFacilities = data.airspaceExclusionFacilities;
-        this._defaultSectorId = String(data.defaultSectorId);
+        this._defaultSectorConfiguration = data.defaultSectorConfiguration;
         this._facilityName = data.facilityName;
         this._sectorCollection = new SectorCollection(this._facilityIdentifier, data.sectors);
 
-        this.combineAllSectorsToDefault();
+        this.combineSectorsToDefaultConfiguration();
     }
 
     /**
-     * Combine all `Sector`s in the `Facility`'s `SectorCollection` to the default sector
+     * Combine all `Sector`s in the `Facility`'s `SectorCollection`
+     * as specified in their default sector configuration
      *
      * @for Facility
-     * @method combineAllSectorsToDefault
+     * @method combineSectorsToDefaultConfiguration
      * @returns {undefined}
      */
-    combineAllSectorsToDefault() {
-        const allSectors = this._sectorCollection.sectors;
-        const defaultSector = this._sectorCollection.getSectorWithId(this._defaultSectorId);
+    combineSectorsToDefaultConfiguration() {
+        for (const [sectorId, absorbingSectorId] of Object.entries(this._defaultSectorConfiguration)) {
+            const sector = this._sectorCollection.getSectorWithId(sectorId);
+            const absorbingSector = this._sectorCollection.getSectorWithId(absorbingSectorId);
 
-        this.combineSectorsTo(allSectors, defaultSector);
+            if (typeof sector === 'undefined') {
+                throw new TypeError(`${this._facilityIdentifier} is using a default sector configuration` +
+                    `in which sector ${sectorId} is said to be combined at sector ${absorbingSectorId}, ` +
+                    `but sector ${sectorId} is not a defined sector!`);
+            }
+
+            if (typeof absorbingSector === 'undefined') {
+                throw new TypeError(`${this._facilityIdentifier} is using a default sector configuration` +
+                    `in which sector ${sectorId} is said to be combined at sector ${absorbingSectorId}, ` +
+                    `but sector ${absorbingSectorId} is not a defined sector!`);
+            }
+
+            this.combineSectorTo(sector, absorbingSector);
+        }
     }
 
     /**
@@ -159,6 +181,21 @@ export default class Facility {
      */
     getSectorsFromTurfPoint(turfPoint) {
         return this._sectorCollection.getSectorsFromTurfPoint(turfPoint);
+    }
+
+    /**
+     * Return all `Sector`s of this facility which are open (ie not a subsector of any other sector)
+     *
+     * @for Facility
+     * @method getAllOpenSectors
+     * @returns {array<Sector>}
+     */
+    getAllOpenSectors() {
+        const openSectors = this._sectorCollection.sectors.filter((sector) => {
+            return this._sectorCollection.sectors.every((otherSector) => !otherSector.subSectors.includes(sector));
+        });
+
+        return openSectors;
     }
 
     getAllSectors() {

@@ -8,7 +8,7 @@ export const DCC = {
         center: {
             airspaceExclusionFacilities: [],
             facilityName: 'VATUSA Command Center',
-            defaultSectorId: 'ZMA',
+            defaultSectorConfiguration: {},
             sectors: {
                 ZAB: [
                     {
