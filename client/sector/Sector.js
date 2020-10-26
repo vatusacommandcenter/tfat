@@ -1,7 +1,13 @@
-import { lineString } from '@turf/helpers';
+import _intersection from 'lodash/intersection.js';
+import { lineString, point } from '@turf/helpers';
+import greatCircle from '@turf/great-circle';
 import lineToPolygon from '@turf/line-to-polygon';
+import booleanCrosses from '@turf/boolean-crosses';
 import lineIntersect from '@turf/line-intersect';
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
+import { distanceNm } from '../clientUtilities';
+import distance from '@turf/distance';
+import { entries } from 'lodash';
 
 export default class Sector {
     constructor(facilityId, sectorId, data) {
@@ -10,6 +16,7 @@ export default class Sector {
         this._sectorId = sectorId;
         this.subSectors = [];
         this.timeTable = {};
+        this.recursiveTimeTable = {};
 
         this._init(data);
     }
@@ -61,7 +68,24 @@ export default class Sector {
         const intersections = [];
 
         for (const poly of this._polygons) {
+            const startTurfPoint = point(turfLineString.geometry.coordinates[0]);
+            const endTurfPoint = point(turfLineString.geometry.coordinates[1]);
+            const lineLength = distance(startTurfPoint, endTurfPoint); // in km
+
+            // if (turfLineString.geometry.type !== 'LineString') debugger;
+
+            // since `lineIntersect` does not use great circles. For long legs, add more nodes to increase accuracy
+            if (lineLength > 150) { // km
+                const numberOfNodes = 2 + Math.floor(lineLength / 150);
+                const options = { npoints: numberOfNodes, offset: Number.EPSILON };
+                turfLineString = greatCircle(...turfLineString.geometry.coordinates, options);
+            }
+
+            // if (turfLineString.geometry.type !== 'LineString') debugger;
+
             let intersectingPoints = lineIntersect(turfLineString, poly);
+            const a = booleanCrosses(turfLineString, poly);
+            const c = booleanCrosses(poly, turfLineString);
 
             if (intersectingPoints.features.length === 0) {
                 continue;
@@ -76,6 +100,30 @@ export default class Sector {
         }
 
         return intersections;
+    }
+
+    /**
+     * Returns whether the specified sector and this sector share are combined to the same controller
+     *
+     * @for Sector
+     * @method hasCommonParentWithSector
+     * @param {Sector} sector
+     * @returns {boolean}
+     */
+    hasCommonParentWithSector(sector) {
+        if (this.subSectors.includes(sector)) { // specified sector is comined at THIS sector
+            return true;
+        }
+
+        if (sector.subSectors.includes(this)) { // THIS sector is combined at the specified sector
+            return true;
+        }
+
+        if (_intersection(this.subSectors, sector.subSectors).length > 0) { // both sectors are combined to the same parent sector
+            return true;
+        }
+
+        return false;
     }
 
     /**

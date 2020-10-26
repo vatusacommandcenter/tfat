@@ -1,5 +1,6 @@
 import _flatten from 'lodash/flatten.js';
 import _last from 'lodash/last.js';
+import _pull from 'lodash/pull.js';
 import _without from 'lodash/without.js';
 import Sector from './Sector.js';
 import Waypoint from '../aircraft/Waypoint.js';
@@ -80,7 +81,7 @@ export default class SectorCollection {
     }
 
     /**
-     * Update the timetables for all `Sector`s
+     * Update the `timeTable`s AND `recursiveTimeTable`s for all `Sector`s
      *
      * @for SectorCollection
      * @method updateSectorTimeTables
@@ -94,7 +95,7 @@ export default class SectorCollection {
         this._clearAllSectorTimeTables();
 
         for (const { aircraft, waypoint } of sortedSectorChanges) {
-            // if (aircraft.callsign === 'PAO324') debugger;
+            // if (aircraft.callsign === 'AFT101') debugger;
             const { enter, exit } = waypoint.sectorChange;
             const timeInteger = waypoint.time.getTime();
 
@@ -106,26 +107,63 @@ export default class SectorCollection {
             // check for exits first, so any overwrites favor KEEPING the a/c in the count
             if (exit.length > 0) { // if exiting sector(s)
                 for (const sector of exit) { // for each sector being exited
-                    if (sector.facilityId !== this._facilityId) { // if a sector of a different facility
-                        continue;
-                    }
+                    const parentSector = this._getParentOfSector(sector);
+                    // TODO: Why did we want to do this? Disabling for now.
+                    // if (sector.facilityId !== this._facilityId) { // if a sector of a different facility
+                    //     continue;
+                    // }
 
                     if (enter.includes(sector)) { // if exiting one shelf and entering another of the same sector
                         continue;
                     }
 
+                    let previousAircraftList = [];
                     const previousTime = _last(Object.keys(sector.timeTable));
-                    const previousAircraftList = sector.timeTable[previousTime];
+
+                    if (typeof previousTime !== 'undefined') {
+                        previousAircraftList = sector.timeTable[previousTime];
+                    }
+
+                    if (!previousAircraftList.includes(aircraft)) {
+                        if (aircraft.callsign === 'AFT101') debugger;
+                        console.error('A/C detected to exit a sector they never entered. Something has probably ' +
+                            `gone wrong. Skipping removal of ${aircraft.callsign} from sector ${sector.id}`);
+                    }
+
                     const nextAircraftList = _without(previousAircraftList, aircraft);
                     sector.timeTable[timeInteger] = nextAircraftList;
+                    const isEnteringParentSector = enter.includes(parentSector);
+                    const isEnteringSiblingSector = parentSector.subSectors.some((sct) => enter.includes(sct));
+
+                    if (isEnteringParentSector || isEnteringSiblingSector) {
+                        continue; // do not log this as a sector exit in the recursive time table
+                    }
+
+                    let recursivePreviousAircraftList = [];
+                    const recursivePreviousTime = _last(Object.keys(parentSector.recursiveTimeTable));
+
+                    if (typeof recursivePreviousTime !== 'undefined') {
+                        recursivePreviousAircraftList = parentSector.recursiveTimeTable[recursivePreviousTime];
+                    }
+
+                    if (!recursivePreviousAircraftList.includes(aircraft)) {
+                        if (aircraft.callsign === 'AFT101') debugger;
+                        console.error('A/C detected to exit a sector they never entered. Something has probably ' +
+                            `gone wrong. Skipping removal of ${aircraft.callsign} from parent sector ${parentSector.id}`);
+                    }
+
+                    const recursiveNextAircraftList = _without(recursivePreviousAircraftList, aircraft);
+                    parentSector.recursiveTimeTable[timeInteger] = recursiveNextAircraftList;
                 }
             }
 
             if (enter.length > 0) { // if entering new sector(s)
                 for (const sector of enter) { // for each sector being entered
-                    if (sector.facilityId !== this._facilityId) { // if a sector of a different facility
-                        continue;
-                    }
+                    const parentSector = this._getParentOfSector(sector);
+                    // TODO: Why did we want to do this? Disabling for now.
+                    // if (sector.facilityId !== this._facilityId) { // if a sector of a different facility
+                    //     continue;
+                    // }
 
                     if (exit.includes(sector)) { // if exiting one shelf and entering another of the same sector
                         continue;
@@ -138,11 +176,43 @@ export default class SectorCollection {
                         previousAircraftList = sector.timeTable[previousTime];
                     }
 
+                    if (previousAircraftList.includes(aircraft)) {
+                        if (aircraft.callsign === 'AFT101') debugger;
+                        console.error('A/C detected to enter same sector twice. Something has probably ' +
+                            `gone wrong. Skipping second entry for ${aircraft.callsign}.`);
+
+                        _pull(previousAircraftList, aircraft);
+                    }
+
                     // this will also work when two aircraft enter the sector at the exact same time.
                     // since we're processing them in chronological order, we'll just overwrite the same
                     // time table entry, adding all of the aircraft through each iteration
                     const nextAircraftList = [...previousAircraftList, aircraft];
                     sector.timeTable[timeInteger] = nextAircraftList;
+                    const isExitingParentSector = exit.includes(parentSector);
+                    const isExitingSiblingSector = parentSector.subSectors.some((sct) => exit.includes(sct));
+
+                    if (isExitingParentSector || isExitingSiblingSector) {
+                        continue; // do not log this as a sector entry in the recursive time table
+                    }
+
+                    let recursivePreviousAircraftList = [];
+                    const recursivePreviousTime = _last(Object.keys(parentSector.recursiveTimeTable));
+
+                    if (typeof recursivePreviousTime !== 'undefined') {
+                        recursivePreviousAircraftList = parentSector.recursiveTimeTable[recursivePreviousTime];
+                    }
+
+                    if (recursivePreviousAircraftList.includes(aircraft)) {
+                        if (aircraft.callsign === 'AFT101') debugger;
+                        console.error('A/C detected to enter same sector twice. Something has probably ' +
+                            `gone wrong. Skipping second entry for ${aircraft.callsign}.`);
+
+                        _pull(recursivePreviousAircraftList, aircraft);
+                    }
+
+                    const recursiveNextAircraftList = [...recursivePreviousAircraftList, aircraft];
+                    parentSector.recursiveTimeTable[timeInteger] = recursiveNextAircraftList;
                 }
             }
         }
@@ -159,6 +229,25 @@ export default class SectorCollection {
     _clearAllSectorTimeTables() {
         for (const sector of this._sectors) {
             sector.timeTable = {};
+            sector.recursiveTimeTable = {};
         }
+    }
+
+    /**
+     * Return the `Sector` instance who has the provided `Sector` listed as one of its subsectors
+     *
+     * @for SectorCollection
+     * @method _getParentOfSector
+     * @param {Sector} sector
+     * @return {Sector}
+     */
+    _getParentOfSector(sector) {
+        const parentSector = this._sectors.find((parentSector) => parentSector.subSectors.includes(sector));
+
+        if (typeof parentSector === 'undefined') {
+            return sector;
+        }
+
+        return parentSector;
     }
 }

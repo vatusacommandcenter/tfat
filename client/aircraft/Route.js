@@ -302,6 +302,18 @@ export default class Route {
         return this._waypoints.filter((wp) => wp.sectorChange.enter.length > 0 || wp.sectorChange.exit.length > 0);
     }
 
+    /**
+     * Return a string that can be pasted directly into SkyVector's Flight Plan function to display
+     * the route as interpreted by the limited nav data of the `NavigationLibrary`.
+     *
+     * @for Route
+     * @method getSkyVectorableRouteString
+     * @return {string}
+     */
+    getSkyVectorableRouteString() {
+        return this._waypoints.map((wp) => wp.icao).join(' ');
+    }
+
     /* ----------------------------- PRIVATE ----------------------------- */
 
     /**
@@ -342,16 +354,17 @@ export default class Route {
                 continue;
             }
 
-            const previousWaypointCoords = this._waypoints[i - 1].turfPoint.geometry.coordinates;
-            const currentWaypointCoords = this._waypoints[i].turfPoint.geometry.coordinates;
-            const legMidpointCoords = [
-                (previousWaypointCoords[0] + currentWaypointCoords[0]) / 2,
-                (previousWaypointCoords[1] + currentWaypointCoords[1]) / 2
-            ];
+            // const previousWaypointCoords = this._waypoints[i - 1].turfPoint.geometry.coordinates;
+            // const currentWaypointCoords = this._waypoints[i].turfPoint.geometry.coordinates;
+            // const legMidpointCoords = [
+            //     (previousWaypointCoords[0] + currentWaypointCoords[0]) / 2,
+            //     (previousWaypointCoords[1] + currentWaypointCoords[1]) / 2
+            // ];
 
             for (let j = 0; j < waypoint.sectorBoundaryPolygons.length; j++) {
                 const poly = waypoint.sectorBoundaryPolygons[j];
-                const isExitingPoly = booleanPointInPolygon(legMidpointCoords, poly);
+                // const isExitingPoly = booleanPointInPolygon(legMidpointCoords, poly);
+                const isExitingPoly = this._hasEnteredButNotExitedSector(poly.properties.sector);
 
                 if (isExitingPoly) { // Waypoint marks the position the aircraft LEAVES the sector
                     waypoint.sectorChange.exit.push(poly.properties.sector);
@@ -465,6 +478,46 @@ export default class Route {
 
         // return sectors entered but not exited
         return sectors;
+    }
+
+    /**
+     * Return whether or not we have entered a sector and not yet exited it in the current state of the `Route`
+     *
+     * @for Route
+     * @method _hasEnteredButNotExitedSector
+     * @param {Sector} sector
+     * @returns {boolean}
+     */
+    _hasEnteredButNotExitedSector(sector) {
+        let waypointIndexEnteredSector = -1;
+
+        // record the index at which the route enters the sector
+        for (let i = this._waypoints.length - 1; i >= 0; i--) {
+            const waypoint = this._waypoints[i];
+
+            if (waypoint.sectorChange.enter.includes(sector)) {
+                if (waypoint.sectorChange.exit.includes(sector)) { // exiting 1 polygon of that sector & entering ANOTHER polygon
+                    return true; // then we know we have just exited and reentered, and never RE-EXITED.
+                }
+
+                waypointIndexEnteredSector = i;
+
+                break;
+            }
+        }
+
+        if (waypointIndexEnteredSector === -1) { // if we have never entered the specified sector
+            return false;
+        }
+
+        // determine if we have exited that sector since entering it
+        for (let i = waypointIndexEnteredSector; i < this._waypoints.length; i++) {
+            if (this._waypoints[i].sectorChange.exit.includes(sector)) {
+                return false; // because we HAVE exited the sector we entered
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -623,6 +676,7 @@ export default class Route {
             const waypoint = this._waypoints[i];
             const nextWaypoint = this._waypoints[i + 1];
             const turfLineString = lineString([waypoint.coordinatesLonLat, nextWaypoint.coordinatesLonLat]);
+            if (this._destination === 'RJAA' && this._groundSpeedOfAircraft === 450) debugger;
             const boundaryWaypoints = organizationCollection.getSectorBoundaryCrossingWaypoints(turfLineString);
 
             if (boundaryWaypoints.length === 0) {
@@ -644,6 +698,27 @@ export default class Route {
                 if (thisIndexWp.isCollocatedWithWaypoint(nextIndexWp)) { // if collocated, merge waypoint sector poly data
                     thisIndexWp.sectorBoundaryPolygons.push(...nextIndexWp.sectorBoundaryPolygons);
                     boundaryWaypoints.splice(j + 1, 1);
+                }
+            }
+
+            // if interpolated waypoint within 2km of a real waypoint, just use the real one
+            for (let j = 0; j < boundaryWaypoints.length; j++) {
+                const boundaryWaypoint = boundaryWaypoints[j];
+                const distanceFromFirstWaypoint = distance(waypoint.turfPoint, boundaryWaypoint.turfPoint);
+                const distanceFromSecondWaypoint = distance(nextWaypoint.turfPoint, boundaryWaypoint.turfPoint);
+
+                if (distanceFromFirstWaypoint === 0 && i > 0) { // collocated with first waypoint
+                    // when a real waypoint is exactly on a polygon boundary, we will already have the sectorBoundaryPolygon
+                    // data written when we measured from the previous to this waypoint, so we should skip re-adding it here.
+                    // In cases where this is the first recognized waypoint, meaning the aircraft's current position is BEYOND
+                    // this fix, then we will not skip ahead-- in that case, we will indeed mark this waypoint as an entry.
+                    continue;
+                } else if (distanceFromFirstWaypoint < 2) { // very close to first wp
+                    waypoint.sectorBoundaryPolygons.push(...boundaryWaypoint.sectorBoundaryPolygons);
+                    boundaryWaypoints.splice(j, 1); // remove the bdry wp, in favor of using the real one
+                } else if (distanceFromSecondWaypoint < 2) { // very close to second wp
+                    nextWaypoint.sectorBoundaryPolygons.push(...boundaryWaypoint.sectorBoundaryPolygons);
+                    boundaryWaypoints.splice(j, 1);
                 }
             }
 

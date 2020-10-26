@@ -76,6 +76,7 @@ export default class Aircraft {
      * @private
      */
     _init(updateTime, organizationCollection) {
+        // if (this.callsign === 'AFT101') debugger;
         this.route = new Route({
             aircraftPosition: this.position,
             destination: this.destination,

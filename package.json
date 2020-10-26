@@ -26,8 +26,10 @@
   "license": "MIT",
   "dependencies": {
     "@turf/bearing": "^6.0.1",
+    "@turf/boolean-crosses": "^6.0.1",
     "@turf/boolean-point-in-polygon": "^6.0.1",
     "@turf/distance": "^6.0.1",
+    "@turf/great-circle": "^5.1.5",
     "@turf/helpers": "^6.1.4",
     "@turf/line-intersect": "^6.0.2",
     "@turf/line-to-polygon": "^6.0.1",

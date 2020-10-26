@@ -14,7 +14,7 @@ export default class SectorVolumePageView {
         this.$keyAirportsElement = document.getElementById('svp-key-airports-table');
 
         this._organization = null;
-        this._tableIntervalMinutes = 10;
+        this._tableIntervalMinutes = 30;
         this._tableTotalIntervals = 9;
         this._intervals = [];
         this._airportGroupsTimeTable = [];
@@ -22,10 +22,6 @@ export default class SectorVolumePageView {
         this._keyAirportsTimeTable = [];
 
         this._init(data);
-    }
-
-    get html() {
-        return this._html;
     }
 
     _init(data) {
@@ -255,12 +251,12 @@ export default class SectorVolumePageView {
         return sectorTimeTableIncludingSubsectors;
     }
 
-    _getTimeTableForSector(sector) {
+    _getTimeTableDisplayDataFromTimeTable(sectorTimeTable, sectorId) {
         const rowCounts = [];
         const cellsInRow = [];
 
         for (const [intervalStart, intervalEnd] of this._intervals) {
-            const sectorTimes = Object.keys(sector.timeTable);
+            const sectorTimes = Object.keys(sectorTimeTable);
             let timesWithinThisInterval = sectorTimes.filter((t) => t >= intervalStart && t <= intervalEnd);
 
             if (timesWithinThisInterval.length === 0) { // if no volume changes during this interval
@@ -276,24 +272,76 @@ export default class SectorVolumePageView {
             }
 
             const maxSimultaneousCount = timesWithinThisInterval.reduce((highestCount, time) => {
-                const trafficCountThisInterval = sector.timeTable[time].length;
+                const trafficCountThisInterval = sectorTimeTable[time].length;
 
                 return Math.max(highestCount, trafficCountThisInterval);
             }, 0);
-            const listsInThisInterval = timesWithinThisInterval.map((t) => sector.timeTable[t]);
+            const listsInThisInterval = timesWithinThisInterval.map((t) => sectorTimeTable[t]);
             const aircraftList = _union(listsInThisInterval)[0].map((ac) => ac.callsign);
             cellsInRow.push(aircraftList);
 
             const displayedTrafficCount = maxSimultaneousCount === 0 ? '-' : maxSimultaneousCount;
 
             rowCounts.push(displayedTrafficCount);
-            // rowCounts.push(`<td>${maxSimultaneousCount}</td>`);
         }
 
-        console.log([sector.id, ...cellsInRow]);
+        console.log([sectorId, ...cellsInRow]);
 
-        return [sector.id, ...rowCounts];
+        return [sectorId, ...rowCounts];
     }
+
+    _getTimeTableForSector(sector) {
+        const sectorTimeTable = sector.timeTable;
+        const sectorId = sector.id;
+
+        return this._getTimeTableDisplayDataFromTimeTable(sectorTimeTable, sectorId);
+    }
+
+    // _getTimeTableForSectorIncludingItsSubsectors(sector) {
+    //     const sectorRecursiveTimeTable = sector.recursiveTimeTable;
+    //     const sectorId = sector.id;
+
+    //     return this._getTimeTableDisplayDataFromTimeTable(sectorRecursiveTimeTable, sectorId);
+
+    //     // const rowCounts = [];
+    //     // const cellsInRow = [];
+
+    //     // for (const [intervalStart, intervalEnd] of this._intervals) {
+    //     //     const sectorTimes = Object.keys(sector.timeTable);
+    //     //     let timesWithinThisInterval = sectorTimes.filter((t) => t >= intervalStart && t <= intervalEnd);
+
+    //     //     if (timesWithinThisInterval.length === 0) { // if no volume changes during this interval
+    //     //         const previousSectorState = _findLast(sectorTimes, (t) => t < intervalStart);
+
+    //     //         if (typeof previousSectorState === 'undefined') {
+    //     //             rowCounts.push('-');
+
+    //     //             continue;
+    //     //         }
+
+    //     //         timesWithinThisInterval = [previousSectorState]; // use the previous sector state
+    //     //     }
+
+    //     //     const maxSimultaneousCountThisSector = timesWithinThisInterval.reduce((highestCount, time) => {
+    //     //         const trafficCountThisInterval = sector.timeTable[time].length;
+    //     //         // const subsectorTrafficCounts = sector.subSectors.map((sct) => sct.timeTable)
+
+    //     //         return Math.max(highestCount, trafficCountThisInterval);
+    //     //     }, 0);
+    //     //     const listsInThisInterval = timesWithinThisInterval.map((t) => sector.timeTable[t]);
+    //     //     const aircraftList = _union(listsInThisInterval)[0].map((ac) => ac.callsign);
+    //     //     cellsInRow.push(aircraftList);
+
+    //     //     const displayedTrafficCount = maxSimultaneousCountThisSector === 0 ? '-' : maxSimultaneousCountThisSector;
+
+    //     //     rowCounts.push(displayedTrafficCount);
+    //     //     // rowCounts.push(`<td>${maxSimultaneousCount}</td>`);
+    //     // }
+
+    //     // console.log([sector.id, ...cellsInRow]);
+
+    //     // return [sector.id, ...rowCounts];
+    // }
 
     /**
      * Return a time table for the specified sector where you combine all polygons of the sector AND SUBSECTORS
@@ -304,11 +352,10 @@ export default class SectorVolumePageView {
      * @return {array<string>}
      */
     _getRecursiveTimeTableForSector(sector) {
-        // FIXME: for now...
-        const timeTable = this._getTimeTableForSector(sector);
-        timeTable[0] += '+';
+        const sectorRecursiveTimeTable = sector.recursiveTimeTable;
+        const sectorId = `${sector.id}+`;
 
-        return timeTable;
+        return this._getTimeTableDisplayDataFromTimeTable(sectorRecursiveTimeTable, sectorId);
     }
 
     _updateKeyAirportsTableElementFromKeyAirportTimeTable() {
