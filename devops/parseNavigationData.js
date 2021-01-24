@@ -10,8 +10,10 @@ import path from 'path';
 import { DECIMAL_RADIX } from '../globalConstants.js';
 
 const navRelativePath = path.join(path.resolve(), 'client/navData');
+const faaSectorFilePath = path.join(navRelativePath, 'faa.sct2');
 const waypointDataFilePath = path.join(navRelativePath, 'waypoints.json');
 const airportDataFilePath = path.join(navRelativePath, 'airports.json');
+const faaSctData = fs.readFileSync(faaSectorFilePath, 'utf-8');
 const waypointData = JSON.parse(fs.readFileSync(waypointDataFilePath, 'utf-8'));
 const airportData = JSON.parse(fs.readFileSync(airportDataFilePath, 'utf-8'));
 const outputFilePath = path.join(navRelativePath, 'navigationData.js');
@@ -23,32 +25,33 @@ const outputFilePath = path.join(navRelativePath, 'navigationData.js');
  * @returns {object}
  */
 function parseWaypointData() {
-    const waypointDataInfo = waypointData.Waypoints.File_Info;
-    const waypointList = waypointData.Waypoints.Waypoint;
-    const parsedWaypointList = [];
+    const fixData = faaSctData.split('[FIXES]')[1].split('\\[.*\\]')[0];
+    // const waypointDataInfo = waypointData.Waypoints.File_Info;
+    // const waypointList = waypointData.Waypoints.Waypoint;
+    // const parsedWaypointList = [];
 
-    for (const wp of waypointList) {
-        const id = wp._attributes.ID;
-        const type = wp._attributes.Type;
-        const position = {
-            lat: parseFloat(wp.Location._attributes.Lat),
-            lon: parseFloat(wp.Location._attributes.Lon)
-        };
+    // for (const wp of waypointList) {
+    //     const id = wp._attributes.ID;
+    //     const type = wp._attributes.Type;
+    //     const position = {
+    //         lat: parseFloat(wp.Location._attributes.Lat),
+    //         lon: parseFloat(wp.Location._attributes.Lon)
+    //     };
 
-        if (!type || !id || !position) {
-            console.warn(`Unable to parse a nav data item, type ${type}, id ${id}, pos ${position}`);
+    //     if (!type || !id || !position) {
+    //         console.warn(`Unable to parse a nav data item, type ${type}, id ${id}, pos ${position}`);
 
-            continue;
-        }
+    //         continue;
+    //     }
 
-        // TODO: Use `FixModel` for all waypoint/vor/ndb/etc
-        parsedWaypointList.push({ id, type, position });
-    }
+    //     // TODO: Use `FixModel` for all waypoint/vor/ndb/etc
+    //     parsedWaypointList.push({ id, type, position });
+    // }
 
-    const types = [...new Set(parsedWaypointList.map((wp) => wp.type))];
-    console.log(types);
+    // const types = [...new Set(parsedWaypointList.map((wp) => wp.type))];
+    // console.log(types);
 
-    return { waypointDataInfo, parsedWaypointList };
+    // return { waypointDataInfo, parsedWaypointList };
 }
 
 /**

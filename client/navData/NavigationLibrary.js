@@ -1,6 +1,18 @@
 import { NAV_DATA } from './navigationData.js';
+import { faaSectorData } from './faa.sct2';
 import Fix from './Fix.js';
 import Airport from './Airport.js';
+import { DECIMAL_RADIX } from '../../globalConstants.js';
+import { WAYPOINT_TYPES } from '../constants/routeConstants.js';
+
+// NAVIGATION DATA SOURCES:
+// Worldwide Data:
+// Airports: airports.csv from... https://ourairports.com/data/
+//
+// FAA Data (full coverage):
+// VATUSA "ARTCC Publications" (contact Kyle Sanders, vSLC)
+//     --> https://www.dropbox.com/sh/2rze0m3d6sfbu2k/AABjdewzVSOjgULppRiqESOha?dl=0
+//     --> includes fixes, VORs, NDBs, airways, SIDs, STARs
 
 class NavigationLibrary {
     constructor() {
@@ -37,37 +49,112 @@ class NavigationLibrary {
      *
      * @for NavigationLibrary
      * @method _initFixes
-     * @returns {undefined}
+     * @returns undefined
      */
     _initFixes() {
-        const nextFixList = {};
+        this._initCaseyDierFixes();
+
+        const ndbData = faaSectorData.split('[NDB]')[1].split(/\[.*\].*/)[0].split('\n');
+        const vorData = faaSectorData.split('[VOR]')[1].split(/\[.*\].*/)[0].split('\n');
+        const fixData = faaSectorData.split('[FIXES]')[1].split(/\[.*\].*/)[0].split('\n');
+
+        const ndbs = this._buildNavItems(ndbData, WAYPOINT_TYPES.NDB);
+        const vors = this._buildNavItems(vorData, WAYPOINT_TYPES.VOR);
+        const fixes = this._buildNavItems(fixData, WAYPOINT_TYPES.FIX);
+
+        // TODO: Is this a good way to do this? It will overwrite duplicates, rather than including both!
+        this._fixes = { ...ndbs, ...vors, ...fixes };
+    }
+
+    /**
+     * Import Casey Dier's fixes
+     *
+     * @for NavigationLibrary
+     * @method _initCaseyDierFixes
+     * @returns undefined
+     * @private
+     */
+    _initCaseyDierFixes() {
+        const caseyDierFixList = {};
 
         for (const fixData of NAV_DATA.waypoints) {
             const fixName = fixData.id;
 
             // if another fix by this name already exists
-            if (fixName in nextFixList) {
+            if (fixName in caseyDierFixList) {
                 console.warn(`Multiple fixes named ${fixName}!`);
 
                 // if multiple fixes by this name already exist, excluding this one
-                if (Array.isArray(nextFixList[fixName])) {
-                    nextFixList[fixName].push(new Fix(fixData));
+                if (Array.isArray(caseyDierFixList[fixName])) {
+                    caseyDierFixList[fixName].push(new Fix(fixData));
 
                     continue;
                 }
 
-                nextFixList[fixName] = [nextFixList[fixName], new Fix(fixData)];
+                caseyDierFixList[fixName] = [caseyDierFixList[fixName], new Fix(fixData)];
 
                 continue;
             }
 
-            nextFixList[fixName] = new Fix(fixData);
+            caseyDierFixList[fixName] = new Fix(fixData);
         }
 
-        this._fixes = nextFixList;
-        this.getFixWithName('XXXXX');
-        this.getFixWithName('HEDLY');
-        this.getFixWithName('MOS');
+        this._fixes = caseyDierFixList;
+    }
+
+    _buildNavItems(faaSctData, waypointType) {
+        const navItemList = {};
+        const indices = {
+            // for each type, point to: [ id, lat, lon ]
+            FIX: [0, 1, 2],
+            VOR: [0, 2, 3],
+            NDB: [0, 2, 3]
+        };
+
+        for (let line of faaSctData) {
+            line = line.split(';')[0].trim(); // remove comments and whitespace
+            const elements = line.split(' ').filter(Boolean);
+
+            if (elements.length < 3) {
+                continue;
+            }
+
+            const navItemId = elements[indices[waypointType][0]];
+            const latDms = elements[indices[waypointType][1]];
+            const lonDms = elements[indices[waypointType][2]];
+            const latDecimal = this._calculateDecimalLatOrLonFromSctDms(latDms);
+            const lonDecimal = this._calculateDecimalLatOrLonFromSctDms(lonDms);
+            const fixParams = {
+                id: navItemId,
+                position: { lat: latDecimal, lon: lonDecimal },
+                type: waypointType
+            };
+
+            if (Number.isNaN(latDecimal) || Number.isNaN(lonDecimal)) {
+                debugger;
+                continue;
+            }
+
+            // if another fix by this name already exists
+            if (navItemId in navItemList) {
+                console.warn(`Multiple fixes named ${navItemId}!`);
+
+                // if multiple fixes by this name already exist, excluding this one
+                if (Array.isArray(navItemList[navItemId])) {
+                    navItemList[navItemId].push(new Fix(fixParams));
+
+                    continue;
+                }
+
+                navItemList[navItemId] = [navItemList[navItemId], new Fix(fixParams)];
+
+                continue;
+            }
+
+            navItemList[navItemId] = new Fix(fixParams);
+        }
+
+        return navItemList;
     }
 
     getFixWithName(fixName) {
@@ -105,6 +192,10 @@ class NavigationLibrary {
     }
 
     getAirportWithIcao(icao) {
+        if (icao === '') {
+            return undefined;
+        }
+
         if (!(icao in this._airports)) {
             if (icao in this._fixes) {
                 if (Array.isArray(this._fixes[icao])) {
@@ -128,6 +219,27 @@ class NavigationLibrary {
         }
 
         return this._airports[icao];
+    }
+
+    /**
+     * Calculate a decimal latitude (or longitude) value from the provided *.sct2 formatted value
+     *
+     * @for NavigationLibrary
+     * @method _calculateDecimalLatOrLonFromSctDms
+     * @param latOrLonDms {string} Degree-Minutes-Seconds-DecimalSeconds formatted latitude (or longitude), in *.sct2 format
+     * @returns {number} latitude (or longitude), in decimal degrees
+     * @private
+     */
+    _calculateDecimalLatOrLonFromSctDms(latOrLonDms) {
+        const negativeCharacters = ['S', 'W'];
+        const sign = negativeCharacters.some((char) => latOrLonDms.includes(char)) ? -1 : 1;
+        const elements = latOrLonDms.replace(/[NnSsWwEe]/g, '').split('.');
+        const deg = parseInt(elements[0], DECIMAL_RADIX);
+        const min = parseInt(elements[1], DECIMAL_RADIX);
+        const sec = parseFloat(`${elements[2]}.${elements[3]}`);
+        const decimalDegrees = (deg + (min / 60) + (sec / 60 / 60)) * sign;
+
+        return decimalDegrees;
     }
 }
 
