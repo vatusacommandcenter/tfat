@@ -1,4 +1,7 @@
-import { WAYPOINT_TYPES, SOURCE_DATA_WAYPOINT_TYPES } from '../constants/routeConstants.js';
+import {
+    WAYPOINT_TYPES
+    // SOURCE_DATA_WAYPOINT_TYPES
+} from '../constants/routeConstants.js';
 
 /**
  * Representation of a NAMED location (of any type) known to the `NavigationLibrary`
@@ -11,7 +14,7 @@ export default class Fix {
     constructor(data) {
         this._icao = '';
         this._position = { lat: 0, lon: 0 };
-        this._type = '';
+        this._waypointType = '';
 
         this._init(data);
     }
@@ -57,50 +60,50 @@ export default class Fix {
     _init(data) {
         this._icao = data.id;
         this._position = data.position;
-        this._type = data.type;
+        this._waypointType = data.waypointType;
     }
 
-    _initType(fixType) {
-        // if (fixType === SOURCE_DATA_WAYPOINT_TYPES.AIRPORT_FIX) {
-        //     this._type = WAYPOINT_TYPES.AIRPORT_FIX;
+    // _initType(fixType) {
+    //     if (fixType === SOURCE_DATA_WAYPOINT_TYPES.AIRPORT_FIX) {
+    //         this._waypointType = WAYPOINT_TYPES.AIRPORT_FIX;
 
-        //     return;
-        // }
+    //         return;
+    //     }
 
-        // if (fixType === SOURCE_DATA_WAYPOINT_TYPES.NDB) {
-        //     this._type = WAYPOINT_TYPES.NDB;
+    //     if (fixType === SOURCE_DATA_WAYPOINT_TYPES.NDB) {
+    //         this._waypointType = WAYPOINT_TYPES.NDB;
 
-        //     return;
-        // }
+    //         return;
+    //     }
 
-        // if (fixType === SOURCE_DATA_WAYPOINT_TYPES.VOR) {
-        //     this._type = WAYPOINT_TYPES.VOR;
+    //     if (fixType === SOURCE_DATA_WAYPOINT_TYPES.VOR) {
+    //         this._waypointType = WAYPOINT_TYPES.VOR;
 
-        //     return;
-        // }
+    //         return;
+    //     }
 
-        // if (fixType === SOURCE_DATA_WAYPOINT_TYPES.INTERSECTION) {
-        //     this._type = WAYPOINT_TYPES.FIX;
+    //     if (fixType === SOURCE_DATA_WAYPOINT_TYPES.INTERSECTION) {
+    //         this._waypointType = WAYPOINT_TYPES.FIX;
 
-        //     return;
-        // }
+    //         return;
+    //     }
 
-        // console.error(`Fix ${this._icao} is of unknown type ${fixType}`);
-    }
+    //     console.error(`Fix ${this._icao} is of unknown type ${fixType}`);
+    // }
 
     isAirportFix() {
-        return this._type === WAYPOINT_TYPES.AIRPORT_FIX;
+        return this._waypointType === WAYPOINT_TYPES.AIRPORT_FIX;
     }
 
     isFix() {
-        return this._type === WAYPOINT_TYPES.FIX;
+        return this._waypointType === WAYPOINT_TYPES.FIX;
     }
 
     isNdb() {
-        return this._type === WAYPOINT_TYPES.NDB;
+        return this._waypointType === WAYPOINT_TYPES.NDB;
     }
 
     isVor() {
-        return this._type === WAYPOINT_TYPES.VOR;
+        return this._waypointType === WAYPOINT_TYPES.VOR;
     }
 }

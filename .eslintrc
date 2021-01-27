@@ -15,7 +15,12 @@
         "client/navData/airports.json",
         "client/navData/Airports.xml",
         "client/navData/waypoints.json",
-        "client/navData/Waypoints.xml"
+        "client/navData/Waypoints.xml",
+        "client/navData/worldwide/airports.js",
+        "client/navData/worldwide/airports-old.js",
+        "client/navData/worldwide/airports-newish.js",
+        "client/navData/worldwide/airports-working.js",
+        "client/navData/NASR2SCT_Output/VRC/TestSectorFile.js"
     ],
     "rules": {
         "arrow-body-style": 0,

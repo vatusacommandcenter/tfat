@@ -1,13 +1,17 @@
-import { NAV_DATA } from './navigationData.js';
 import { faaSectorData } from './NASR2SCT_Output/VRC/TestSectorFile.js';
-import Fix from './Fix.js';
+import { worldwideAirports } from './worldwide/airports.js';
 import Airport from './Airport.js';
-import { DECIMAL_RADIX } from '../../globalConstants.js';
+import Fix from './Fix.js';
+import { NAV_DATA } from './navigationData.js';
 import { WAYPOINT_TYPES } from '../constants/routeConstants.js';
+import { DECIMAL_RADIX } from '../../globalConstants.js';
 
 // NAVIGATION DATA SOURCES:
 // Worldwide Data:
 // Airports: airports.csv from... https://ourairports.com/data/
+//     --> First, run: csv-parser client/navdata/worldwide/airports.csv > client/navdata/worldwide/airports.js
+//     --> then add commas to end of line and encapsulate in "const raw = [];"
+//     --> then run `babel-node client/navdata/worldwide/airports2.js`
 //
 // FAA NASR Data (full coverage):
 // Generated from NASR2SCT, MIT Licensed, available at https://github.com/Nikolai558/NASR2SCT
@@ -30,7 +34,7 @@ import { WAYPOINT_TYPES } from '../constants/routeConstants.js';
 class NavigationLibrary {
     constructor() {
         this._airportInfo = NAV_DATA.airportInfo;
-        this._airports = {}; // NAV_DATA.airports;
+        this._airports = {};
         // this._airways = [];
         // this._sids = [];
         // this._stars = [];
@@ -45,6 +49,27 @@ class NavigationLibrary {
         this._initFixes();
     }
 
+    // NOTE: New implementation, using airports.js (from airports.csv)
+    _buildAirportFixes(airportData) {
+        const airportList = {};
+
+        for (const airport of airportData) {
+            const [id, lat, lon] = airport;
+            const position = { lat, lon };
+            const fixParams = { id, position, waypointType: WAYPOINT_TYPES.AIRPORT_FIX };
+            const airportFix = new Fix(fixParams);
+
+            if (id in airportList) {
+                console.warn(`Airport ${id} listed in worldwide/airports.js multiple times!`);
+            }
+
+            airportList[id] = airportFix;
+        }
+
+        return airportList;
+    }
+
+    // // NOTE: Old implementation, using NAV_DATA.airportInfo!
     _initAirports() {
         const nextAirportList = {};
 
@@ -74,105 +99,146 @@ class NavigationLibrary {
         const ndbs = this._buildNavItems(ndbData, WAYPOINT_TYPES.NDB);
         const vors = this._buildNavItems(vorData, WAYPOINT_TYPES.VOR);
         const fixes = this._buildNavItems(fixData, WAYPOINT_TYPES.FIX);
+        const airportFixes = this._buildAirportFixes(worldwideAirports);
 
         // TODO: Is this a good way to do this? It will overwrite NDB-VOR duplicates, rather than including both!
-        this._fixes = { ...ndbs, ...vors, ...fixes };
+        this._fixes = {
+            ...ndbs,
+            ...vors,
+            ...fixes,
+            ...airportFixes
+        };
     }
 
-    /**
-     * Import Casey Dier's fixes
-     *
-     * @for NavigationLibrary
-     * @method _initCaseyDierFixes
-     * @returns undefined
-     * @private
-     */
-    _initCaseyDierFixes() {
-        const caseyDierFixList = {};
+    // /**
+    //  * Import Casey Dier's fixes
+    //  *
+    //  * @for NavigationLibrary
+    //  * @method _initCaseyDierFixes
+    //  * @returns undefined
+    //  * @private
+    //  */
+    // _initCaseyDierFixes() {
+    //     const caseyDierFixList = {};
 
-        for (const fixData of NAV_DATA.waypoints) {
-            const fixName = fixData.id;
+    //     for (const fixData of NAV_DATA.waypoints) {
+    //         const fixName = fixData.id;
 
-            // if another fix by this name already exists
-            if (fixName in caseyDierFixList) {
-                console.warn(`Multiple fixes named ${fixName}!`);
+    //         // if another fix by this name already exists
+    //         if (fixName in caseyDierFixList) {
+    //             // if multiple fixes by this name already exist, excluding this one
+    //             if (Array.isArray(caseyDierFixList[fixName])) {
+    //                 caseyDierFixList[fixName].push(new Fix(fixData));
 
-                // if multiple fixes by this name already exist, excluding this one
-                if (Array.isArray(caseyDierFixList[fixName])) {
-                    caseyDierFixList[fixName].push(new Fix(fixData));
+    //                 continue;
+    //             }
 
-                    continue;
-                }
+    //             caseyDierFixList[fixName] = [caseyDierFixList[fixName], new Fix(fixData)];
 
-                caseyDierFixList[fixName] = [caseyDierFixList[fixName], new Fix(fixData)];
+    //             continue;
+    //         }
 
-                continue;
-            }
+    //         caseyDierFixList[fixName] = new Fix(fixData);
+    //     }
 
-            caseyDierFixList[fixName] = new Fix(fixData);
-        }
-
-        this._fixes = caseyDierFixList;
-    }
+    //     this._fixes = caseyDierFixList;
+    // }
 
     _buildNavItems(faaSctData, waypointType) {
         const navItemList = {};
 
-        const [id, lat, lon] = this._getElementsFromLineForWaypointType(line, waypointType);
-
-        // FIXME: RESUME HERE
-
-        const indices = {
-            // for each type, point to: [ id, lat, lon ]
-            FIX: [0, 1, 2],
-            VOR: [0, 2, 3],
-            NDB: [0, 2, 3]
-        };
-
-        for (let line of faaSctData) {
-            line = line.split(';')[0].trim(); // remove comments and whitespace
-            const elements = line.split(' ').filter(Boolean);
-
-            if (elements.length < 3) {
+        for (const line of faaSctData) {
+            if (line.split(';')[0].trim().split(' ').filter(Boolean).length < 3) { // not enough data in line
                 continue;
             }
 
-            const navItemId = elements[indices[waypointType][0]];
-            const latDms = elements[indices[waypointType][1]];
-            const lonDms = elements[indices[waypointType][2]];
-            const latDecimal = this._calculateDecimalLatOrLonFromSctDms(latDms);
-            const lonDecimal = this._calculateDecimalLatOrLonFromSctDms(lonDms);
-            const fixParams = {
-                id: navItemId,
-                position: { lat: latDecimal, lon: lonDecimal },
-                type: waypointType
-            };
+            const fixParams = this._getFixParametersFromLineForWaypointType(line, waypointType);
+            const { id, position } = fixParams;
 
-            if (Number.isNaN(latDecimal) || Number.isNaN(lonDecimal)) {
-                debugger;
+            // `id` and `lat` will always have content if `lon` does, so just check for lon content
+            if (typeof position.lon === 'undefined') {
+                console.warn(`Bad data format for ${waypointType} "${id}" from line "${line}"!`);
+
                 continue;
             }
 
             // if another fix by this name already exists
-            if (navItemId in navItemList) {
-                console.warn(`Multiple fixes named ${navItemId}!`);
-
+            if (id in navItemList) {
                 // if multiple fixes by this name already exist, excluding this one
-                if (Array.isArray(navItemList[navItemId])) {
-                    navItemList[navItemId].push(new Fix(fixParams));
+                if (Array.isArray(navItemList[id])) {
+                    navItemList[id].push(new Fix(fixParams));
 
                     continue;
                 }
 
-                navItemList[navItemId] = [navItemList[navItemId], new Fix(fixParams)];
+                navItemList[id] = [navItemList[id], new Fix(fixParams)];
 
                 continue;
             }
 
-            navItemList[navItemId] = new Fix(fixParams);
+            navItemList[id] = new Fix(fixParams);
         }
 
         return navItemList;
+    }
+
+    _getFixParametersFromLineForWaypointType(line, waypointType) {
+        switch (waypointType) {
+            case WAYPOINT_TYPES.FIX:
+                return this._getFixParametersFromLineForFix(line);
+
+            case WAYPOINT_TYPES.NDB:
+                return this._getFixParametersFromLineForNdb(line);
+
+            case WAYPOINT_TYPES.VOR:
+                return this._getFixParametersFromLineForVor(line);
+
+            default:
+                throw new TypeError(`Expected waypoint type of FIX / NDB / VOR, but received type ${waypointType}!`);
+        }
+    }
+
+    _getFixParametersFromLineForAirport(line) {
+        const elements = line.replaceAll(', ', ' | ').split(','); // handle quote-enclosed commas (some airport names have commas)
+        const id = elements[1].trim().replaceAll('"', '');
+        const lat = parseFloat(elements[4].trim().replaceAll('"', ''));
+        const lon = parseFloat(elements[5].trim().replaceAll('"', ''));
+
+        if (Number.isNaN(lat) || Number.isNaN(lon)) {
+            debugger;
+        }
+
+        return { id, position: { lat, lon }, waypointType: WAYPOINT_TYPES.AIRPORT_FIX };
+    }
+
+    _getFixParametersFromLineForFix(line) {
+        line = line.trim();
+        const id = line.substr(0, 5).trim();
+        const [latDms, lonDms] = line.substr(6).split(' ').filter(Boolean);
+        const latDecimal = this._calculateDecimalLatOrLonFromSctDms(latDms.trim());
+        const lonDecimal = this._calculateDecimalLatOrLonFromSctDms(lonDms.trim());
+
+        return { id, position: { lat: latDecimal, lon: lonDecimal }, waypointType: WAYPOINT_TYPES.FIX };
+    }
+
+    _getFixParametersFromLineForNdb(line) {
+        line = line.trim();
+        const id = line.substr(0, 3).trim();
+        const [latDms, lonDms] = line.substr(12).split(' ').filter(Boolean);
+        const latDecimal = this._calculateDecimalLatOrLonFromSctDms(latDms.trim());
+        const lonDecimal = this._calculateDecimalLatOrLonFromSctDms(lonDms.trim());
+
+        return { id, position: { lat: latDecimal, lon: lonDecimal }, waypointType: WAYPOINT_TYPES.NDB };
+    }
+
+    _getFixParametersFromLineForVor(line) {
+        line = line.trim();
+        const id = line.substr(0, 3).trim();
+        const [latDms, lonDms] = line.substr(12).split(' ').filter(Boolean);
+        const latDecimal = this._calculateDecimalLatOrLonFromSctDms(latDms.trim());
+        const lonDecimal = this._calculateDecimalLatOrLonFromSctDms(lonDms.trim());
+
+        return { id, position: { lat: latDecimal, lon: lonDecimal }, waypointType: WAYPOINT_TYPES.VOR };
     }
 
     getFixWithName(fixName) {
@@ -184,6 +250,12 @@ class NavigationLibrary {
 
         if (!Array.isArray(itemsUsingThatName)) {
             return this._fixes[fixName];
+        }
+
+        if (itemsUsingThatName.some((item) => !(item instanceof Fix))) {
+            console.log(fixName);
+            console.log(this._fixes[fixName]);
+            debugger;
         }
 
         // choose the appropriate type by priorities
@@ -217,14 +289,14 @@ class NavigationLibrary {
         if (!(icao in this._airports)) {
             if (icao in this._fixes) {
                 if (Array.isArray(this._fixes[icao])) {
-                    console.warn(`Attempted to get airport ${icao}, but there are no airport definitions` +
+                    console.info(`Attempted to get airport ${icao}, but there are no airport definitions` +
                         'and MULTIPLE listings of this identifier in the FIX list. Using the first one: ' +
                         `${JSON.stringify(this._fixes[icao][0])}`);
 
                     return this._fixes[icao][0];
                 }
 
-                console.warn(`Attempted to get airport ${icao}, but there are no airport definitions for ` +
+                console.info(`Attempted to get airport ${icao}, but there are no airport definitions for ` +
                     'it. Using the position defined for this airport found in the fix list: ' +
                     `${JSON.stringify(this._fixes[icao])}`);
 

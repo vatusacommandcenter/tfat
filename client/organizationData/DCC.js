@@ -1,8 +1,8 @@
 export const DCC = {
     organizationName: 'VATUSA ATC System Command Center',
-    keyAirports: ['KATL', 'KBOS', 'KBWI', 'KCLT', 'KDCA', 'KDEN', 'KDFW', 'KDTW', 'KEWR', 'KFLL', 'PHNL', 'KIAD', 'KIAH', 'KJFK', 'KLAS', 'KLAX', 'KLGA', 'KMCO', 'KMDW', 'KMEM', 'KMIA', 'KMSP', 'KORD', 'KPHL', 'KPHX', 'KSAN', 'KSEA', 'KSFO', 'KSLC', 'KTPA'],
+    keyAirports: ['KABQ', 'KATL', 'KBOS', 'KBWI', 'KCLT', 'KDCA', 'KDEN', 'KDFW', 'KDTW', 'KEWR', 'KFLL', 'PHNL', 'KIAD', 'KIAH', 'KJFK', 'KLAS', 'KLAX', 'KLGA', 'KMCO', 'KMDW', 'KMEM', 'KMIA', 'KMSP', 'KORD', 'KPHL', 'KPHX', 'KSAN', 'KSEA', 'KSFO', 'KSLC', 'KTPA'],
     airportGroups: {
-        DCC: ['KATL', 'KBOS', 'KBWI', 'KCLT', 'KDCA', 'KDEN', 'KDFW', 'KDTW', 'KEWR', 'KFLL', 'PHNL', 'KIAD', 'KIAH', 'KJFK', 'KLAS', 'KLAX', 'KLGA', 'KMCO', 'KMDW', 'KMEM', 'KMIA', 'KMSP', 'KORD', 'KPHL', 'KPHX', 'KSAN', 'KSEA', 'KSFO', 'KSLC', 'KTPA']
+        DCC: ['KABQ', 'KATL', 'KBOS', 'KBWI', 'KCLT', 'KDCA', 'KDEN', 'KDFW', 'KDTW', 'KEWR', 'KFLL', 'PHNL', 'KIAD', 'KIAH', 'KJFK', 'KLAS', 'KLAX', 'KLGA', 'KMCO', 'KMDW', 'KMEM', 'KMIA', 'KMSP', 'KORD', 'KPHL', 'KPHX', 'KSAN', 'KSEA', 'KSFO', 'KSLC', 'KTPA']
     },
     facilities: {
         center: {
