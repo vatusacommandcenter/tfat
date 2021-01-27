@@ -1,5 +1,5 @@
 import { NAV_DATA } from './navigationData.js';
-import { faaSectorData } from './faa.sct2';
+import { faaSectorData } from './NASR2SCT_Output/VRC/TestSectorFile.js';
 import Fix from './Fix.js';
 import Airport from './Airport.js';
 import { DECIMAL_RADIX } from '../../globalConstants.js';
@@ -9,11 +9,24 @@ import { WAYPOINT_TYPES } from '../constants/routeConstants.js';
 // Worldwide Data:
 // Airports: airports.csv from... https://ourairports.com/data/
 //
-// FAA Data (full coverage):
-// VATUSA "ARTCC Publications" (contact Kyle Sanders, vSLC)
-//     --> https://www.dropbox.com/sh/2rze0m3d6sfbu2k/AABjdewzVSOjgULppRiqESOha?dl=0
-//     --> includes fixes, VORs, NDBs, airways, SIDs, STARs
+// FAA NASR Data (full coverage):
+// Generated from NASR2SCT, MIT Licensed, available at https://github.com/Nikolai558/NASR2SCT
+// Editing 'VRC/TestSectorFile.sct2' to export as a string (*.js file), we pull data for:
+//  *  --> Airports (position only)
+//     --> Fixes, VORs & NDBs
+//  *  --> Airways (high & low combined)
+//  *  --> Runways (owning airport, runway end coordinates, runway heading)
+//  * indicates planned but not yet implemented
+//
+// Note: NASR2SCT also generates SID/STAR data, but does not differentiate between transitions.
+// Should probably parse NASR ourselves to get the additional information to differentiate between
+// route branches based on different destination airports, runways, etc.
 
+/**
+ * Class holding all known navigation data
+ *
+ * @class NavigationLibrary
+ */
 class NavigationLibrary {
     constructor() {
         this._airportInfo = NAV_DATA.airportInfo;
@@ -52,7 +65,7 @@ class NavigationLibrary {
      * @returns undefined
      */
     _initFixes() {
-        this._initCaseyDierFixes();
+        // this._initCaseyDierFixes();
 
         const ndbData = faaSectorData.split('[NDB]')[1].split(/\[.*\].*/)[0].split('\n');
         const vorData = faaSectorData.split('[VOR]')[1].split(/\[.*\].*/)[0].split('\n');
@@ -62,7 +75,7 @@ class NavigationLibrary {
         const vors = this._buildNavItems(vorData, WAYPOINT_TYPES.VOR);
         const fixes = this._buildNavItems(fixData, WAYPOINT_TYPES.FIX);
 
-        // TODO: Is this a good way to do this? It will overwrite duplicates, rather than including both!
+        // TODO: Is this a good way to do this? It will overwrite NDB-VOR duplicates, rather than including both!
         this._fixes = { ...ndbs, ...vors, ...fixes };
     }
 
@@ -104,6 +117,11 @@ class NavigationLibrary {
 
     _buildNavItems(faaSctData, waypointType) {
         const navItemList = {};
+
+        const [id, lat, lon] = this._getElementsFromLineForWaypointType(line, waypointType);
+
+        // FIXME: RESUME HERE
+
         const indices = {
             // for each type, point to: [ id, lat, lon ]
             FIX: [0, 1, 2],
