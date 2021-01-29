@@ -26,9 +26,9 @@ const outputFilePath = path.join(navRelativePath, 'navigationData.js');
  */
 function parseWaypointData() {
     const fixData = faaSctData.split('[FIXES]')[1].split('\\[.*\\]')[0];
-    // const waypointDataInfo = waypointData.Waypoints.File_Info;
-    // const waypointList = waypointData.Waypoints.Waypoint;
-    // const parsedWaypointList = [];
+    const waypointDataInfo = waypointData.Waypoints.File_Info;
+    const waypointList = waypointData.Waypoints.Waypoint;
+    const parsedWaypointList = [];
 
     // for (const wp of waypointList) {
     //     const id = wp._attributes.ID;
@@ -51,7 +51,7 @@ function parseWaypointData() {
     // const types = [...new Set(parsedWaypointList.map((wp) => wp.type))];
     // console.log(types);
 
-    // return { waypointDataInfo, parsedWaypointList };
+    return { waypointDataInfo, parsedWaypointList };
 }
 
 /**
