@@ -402,6 +402,10 @@ export default class Route {
         const routeElements = this._getElementsFromRouteString();
         const waypoints = [];
 
+        if (typeof routeElements === 'undefined') {
+            return waypoints;
+        }
+
         for (const element of routeElements) {
             if (FIXES_TO_IGNORE.includes(element)) {
                 continue;

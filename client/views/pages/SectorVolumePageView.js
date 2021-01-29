@@ -14,7 +14,7 @@ export default class SectorVolumePageView {
         this.$keyAirportsElement = document.getElementById('svp-key-airports-table');
 
         this._organization = null;
-        this._tableIntervalMinutes = 10;
+        this._tableIntervalMinutes = 30; //10;
         this._tableTotalIntervals = 9;
         this._intervals = [];
         this._airportGroupsTimeTable = [];
