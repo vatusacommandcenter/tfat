@@ -31,7 +31,7 @@
     "@turf/helpers": "^6.1.4",
     "@turf/line-intersect": "^6.0.2",
     "@turf/line-to-polygon": "^6.0.1",
-    "express": "^4.17.1",
+    "express": "^4.18.2",
     "lodash": "^4.17.20",
     "node-fetch": "^2.6.0"
   },
